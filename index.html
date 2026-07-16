@@ -227,12 +227,13 @@
     line-height:1.5;
     letter-spacing:0.3px;
     text-align:center;
-    min-height:clamp(120px, 20vw, 220px);
+    height:clamp(160px, 22vw, 260px);
     display:flex;
     align-items:center;
     justify-content:center;
     flex-wrap:wrap;
     word-break:keep-all;
+    overflow:hidden;
   }
   .tp-passage .correct{ color:var(--mint); }
   .tp-passage .wrong{ color:var(--warn); background:rgba(255,122,144,0.15); border-radius:4px; }
@@ -534,6 +535,18 @@
     padding:20px;
   }
   #notice-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
+  #start-modal{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(91,74,95,0.45);
+    backdrop-filter:blur(4px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #start-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
   @keyframes modalFadeIn{
     from{ opacity:0; transform:scale(0.95); }
     to{ opacity:1; transform:scale(1); }
@@ -892,7 +905,7 @@
             <div class="tp-home-emoji">🎮 🌱</div>
             <h1 class="tp-home-title">용신중학교<br>키보드 배틀</h1>
           </div>
-          <button class="tp-btn" onclick="goPlayerLogin()">🎒 선수 입장</button>
+          <button class="tp-btn" id="home-main-btn" onclick="goPlayerLogin()">🎒 선수 입장</button>
           <button class="tp-btn ghost" onclick="goTeacherGate()">🧑‍🏫 교무실(관리자) 접속</button>
           <button class="tp-btn ghost" onclick="goRanking()">🏆 랭킹 구경만 할래요</button>
         </div>
@@ -966,13 +979,65 @@
     </div>
 
     <!-- 공지사항 팝업 모달 -->
-    <div id="notice-modal" style="display:none;" onclick="closeNoticeModal(event)" style="position:fixed; inset:0; z-index:1000; background:rgba(91,74,95,0.45); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:20px;">
+    <div id="notice-modal" onclick="closeNoticeModal(event)">
       <div class="tp-modal-box" onclick="event.stopPropagation()">
         <div class="tp-modal-head">
           <h2 class="tp-modal-title" id="modal-title"></h2>
           <button class="tp-modal-close" onclick="closeNoticeModal()">✕</button>
         </div>
         <div class="tp-modal-body" id="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- 타자연습 시작 팝업 -->
+    <div id="start-modal" onclick="closeStartModal(event)">
+      <div class="tp-modal-box" onclick="event.stopPropagation()">
+        <div class="tp-modal-head">
+          <h2 class="tp-modal-title">⌨️ 타자연습 시작</h2>
+          <button class="tp-modal-close" onclick="closeStartModal()">✕</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px; margin-top:4px;">
+          <div class="tp-field">
+            <label>연습 언어</label>
+            <div class="tp-choice-group">
+              <button class="tp-choice selected" data-slang="ko" onclick="selectStartLang('ko')">
+                <strong>✏️ 한글 연습</strong>
+              </button>
+              <button class="tp-choice" data-slang="en" onclick="selectStartLang('en')">
+                <strong>🖊️ 영어 연습</strong>
+              </button>
+            </div>
+          </div>
+          <div class="tp-field">
+            <label>연습 유형</label>
+            <div class="tp-choice-group">
+              <button class="tp-choice" data-smode="word" onclick="selectStartMode('word')">
+                <strong>🎵 단어</strong>
+              </button>
+              <button class="tp-choice selected" data-smode="sentence" onclick="selectStartMode('sentence')">
+                <strong>📝 문장</strong>
+              </button>
+            </div>
+          </div>
+          <div class="tp-field">
+            <label>연습 시간</label>
+            <div class="tp-choice-group">
+              <button class="tp-choice" data-stime="30" onclick="selectStartTime(30)">
+                <strong>⏱️ 30초</strong>
+              </button>
+              <button class="tp-choice selected" data-stime="60" onclick="selectStartTime(60)">
+                <strong>⏱️ 60초</strong>
+              </button>
+              <button class="tp-choice" data-stime="90" onclick="selectStartTime(90)">
+                <strong>⏱️ 90초</strong>
+              </button>
+              <button class="tp-choice" data-stime="120" onclick="selectStartTime(120)">
+                <strong>⏱️ 120초</strong>
+              </button>
+            </div>
+          </div>
+          <button class="tp-btn" onclick="startFromModal()">타닥타닥 시작! 🚀</button>
+        </div>
       </div>
     </div>
 
@@ -1046,6 +1111,10 @@
             <button class="tp-choice" data-time="90" onclick="selectDuration(90)">
               <strong>⏱️ 90초</strong>
               <span>길게 집중</span>
+            </button>
+            <button class="tp-choice" data-time="120" onclick="selectDuration(120)">
+              <strong>⏱️ 120초</strong>
+              <span>도전!</span>
             </button>
           </div>
         </div>
@@ -1302,6 +1371,7 @@ function confirmIdentity(student){
 
   // 홈 대시보드도 갱신
   updateDashboard();
+  updateHomeMainBtn();
 
   // 관리자(직접 입력)로 왔다면 로그인 화면으로 넘겨서 언어/시간 고르게
   if(document.getElementById('screen-teacher-entry').classList.contains('active')){
@@ -1315,6 +1385,7 @@ function logout(){
   document.getElementById('user-dashboard').style.display = 'none';
   document.getElementById('step-confirmed').style.display = 'none';
   document.getElementById('post-identity').style.display = 'none';
+  updateHomeMainBtn();
   backToClassSelect();
 }
 
@@ -1441,7 +1512,29 @@ function renderPassage(typed){
       html += '<span class="pending">' + ch + '</span>';
     }
   }
-  document.getElementById('test-passage').innerHTML = html;
+  const el = document.getElementById('test-passage');
+  el.innerHTML = html;
+  adjustPassageFontSize(el, target.length);
+}
+
+function adjustPassageFontSize(el, charLen){
+  // 글자 수에 따라 폰트 크기 자동 조절 (최대 3줄 안에 들어오게)
+  // 화면 너비 기준으로 한 줄에 들어갈 글자 수 추정
+  const containerWidth = el.offsetWidth || 600;
+  let fontSize;
+  if(charLen <= 10){
+    fontSize = Math.min(60, containerWidth / charLen * 0.9);
+  } else if(charLen <= 20){
+    fontSize = Math.min(52, containerWidth / (charLen / 2) * 0.85);
+  } else if(charLen <= 35){
+    fontSize = Math.min(42, containerWidth / (charLen / 2.5) * 0.8);
+  } else if(charLen <= 50){
+    fontSize = Math.min(34, containerWidth / (charLen / 3) * 0.75);
+  } else {
+    fontSize = Math.min(28, containerWidth / (charLen / 3.5) * 0.7);
+  }
+  fontSize = Math.max(18, Math.round(fontSize));
+  el.style.fontSize = fontSize + 'px';
 }
 
 function escapeHtml(ch){
@@ -1897,6 +1990,58 @@ function closeNoticeModal(e){
   const modal = document.getElementById('notice-modal');
   modal.classList.remove('open');
   document.body.style.overflow = '';
+}
+
+// 타자연습 시작 모달
+function openStartModal(){
+  document.querySelectorAll('[data-slang]').forEach(b => b.classList.toggle('selected', b.dataset.slang === state.lang));
+  document.querySelectorAll('[data-smode]').forEach(b => b.classList.toggle('selected', b.dataset.smode === state.mode));
+  document.querySelectorAll('[data-stime]').forEach(b => b.classList.toggle('selected', Number(b.dataset.stime) === state.timeLimit));
+  document.getElementById('start-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStartModal(e){
+  if(e && e.target !== document.getElementById('start-modal')) return;
+  document.getElementById('start-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function selectStartLang(lang){
+  state.lang = lang;
+  document.querySelectorAll('[data-slang]').forEach(b => b.classList.toggle('selected', b.dataset.slang === lang));
+  // 선수입장 화면 버튼도 동기화
+  document.querySelectorAll('[data-lang]').forEach(b => b.classList.toggle('selected', b.dataset.lang === lang));
+}
+
+function selectStartMode(mode){
+  state.mode = mode;
+  document.querySelectorAll('[data-smode]').forEach(b => b.classList.toggle('selected', b.dataset.smode === mode));
+  document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('selected', b.dataset.mode === mode));
+}
+
+function selectStartTime(t){
+  state.timeLimit = t;
+  document.querySelectorAll('[data-stime]').forEach(b => b.classList.toggle('selected', Number(b.dataset.stime) === t));
+  document.querySelectorAll('[data-time]').forEach(b => b.classList.toggle('selected', Number(b.dataset.time) === t));
+}
+
+function startFromModal(){
+  document.getElementById('start-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  startTest();
+}
+
+function updateHomeMainBtn(){
+  const btn = document.getElementById('home-main-btn');
+  if(!btn) return;
+  if(state.student){
+    btn.innerHTML = '⌨️ 타자연습 시작!';
+    btn.onclick = openStartModal;
+  } else {
+    btn.innerHTML = '🎒 선수 입장';
+    btn.onclick = goPlayerLogin;
+  }
 }
 
 function escapeText(s){
