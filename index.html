@@ -222,12 +222,12 @@
     background:var(--panel);
     border:2px solid var(--line);
     border-radius:14px;
-    padding:40px 28px;
-    font-size:60px;
+    padding:28px 24px;
+    font-size:clamp(22px, 4vw, 60px);
     line-height:1.5;
-    letter-spacing:0.5px;
+    letter-spacing:0.3px;
     text-align:center;
-    min-height:220px;
+    min-height:clamp(120px, 20vw, 220px);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -287,9 +287,9 @@
     border:2px solid var(--line);
     color:var(--text);
     border-radius:12px;
-    padding:20px;
+    padding:16px 20px;
     font-family:'Jua', sans-serif;
-    font-size:26px;
+    font-size:clamp(16px, 2.5vw, 28px);
     outline:none;
   }
   input.tp-typebox:focus{ border-color:var(--blue); }
@@ -513,6 +513,80 @@
     border-radius:8px;
     padding:10px 12px;
     text-align:left;
+    cursor:pointer;
+    transition:transform .12s, box-shadow .12s;
+  }
+  .tp-notice-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(255,143,171,0.2);
+  }
+
+  /* 공지 팝업 모달 */
+  #notice-modal{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(91,74,95,0.45);
+    backdrop-filter:blur(4px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #notice-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
+  @keyframes modalFadeIn{
+    from{ opacity:0; transform:scale(0.95); }
+    to{ opacity:1; transform:scale(1); }
+  }
+  .tp-modal-box{
+    background:#fff;
+    border-radius:20px;
+    padding:28px;
+    max-width:560px;
+    width:100%;
+    max-height:80vh;
+    overflow-y:auto;
+    box-shadow:0 20px 60px rgba(91,74,95,0.25);
+    border:2px solid var(--line);
+  }
+  .tp-modal-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--line);
+  }
+  .tp-modal-title{
+    font-family:'Jua', sans-serif;
+    font-size:20px;
+    color:var(--text);
+    margin:0;
+    flex:1;
+  }
+  .tp-modal-close{
+    background:var(--panel2);
+    border:none;
+    color:var(--muted);
+    font-size:16px;
+    cursor:pointer;
+    border-radius:50%;
+    width:32px;
+    height:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .tp-modal-close:hover{ background:var(--line); color:var(--text); }
+  .tp-modal-body{
+    font-family:'Jua', sans-serif;
+    font-size:16px;
+    color:var(--text);
+    line-height:1.8;
+    white-space:pre-wrap;
+    word-break:break-word;
   }
   .tp-notice-title{
     font-family:'Jua', sans-serif;
@@ -888,6 +962,17 @@
             <p class="tp-sub" style="text-align:center; margin-top:4px; color:var(--muted); font-size:12px;">✨ 포인트 시스템은 준비 중이에요</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 공지사항 팝업 모달 -->
+    <div id="notice-modal" style="display:none;" onclick="closeNoticeModal(event)" style="position:fixed; inset:0; z-index:1000; background:rgba(91,74,95,0.45); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:20px;">
+      <div class="tp-modal-box" onclick="event.stopPropagation()">
+        <div class="tp-modal-head">
+          <h2 class="tp-modal-title" id="modal-title"></h2>
+          <button class="tp-modal-close" onclick="closeNoticeModal()">✕</button>
+        </div>
+        <div class="tp-modal-body" id="modal-body"></div>
       </div>
     </div>
 
@@ -1798,6 +1883,22 @@ async function deleteNotice(id){
   }
 }
 
+function openNoticeModal(title, body){
+  document.getElementById('modal-title').textContent = '📌 ' + title;
+  document.getElementById('modal-body').textContent = body;
+  const modal = document.getElementById('notice-modal');
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeNoticeModal(e){
+  // 배경 클릭 or 닫기 버튼 클릭 시 닫힘
+  if(e && e.target !== document.getElementById('notice-modal')) return;
+  const modal = document.getElementById('notice-modal');
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 function escapeText(s){
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
 }
@@ -1824,7 +1925,7 @@ async function loadNoticeList(){
     // 최신 3개만 표시
     wrap.innerHTML = '<div class="tp-notice-list">' +
       notices.slice(0, 3).map(n =>
-        '<div class="tp-notice-card">' +
+        '<div class="tp-notice-card" onclick="openNoticeModal(' + JSON.stringify(n.title) + ',' + JSON.stringify(n.body) + ')">' +
           '<div class="tp-notice-title">📌 ' + escapeText(n.title) + '</div>' +
           '<div class="tp-notice-body">' + escapeText(n.body) + '</div>' +
         '</div>'
@@ -1940,6 +2041,9 @@ async function loadRanking(){
 }
 
 renderClassButtons();
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeNoticeModal({target: document.getElementById('notice-modal')});
+});
 renderTodayDate();
 restoreLastStudent();
 
