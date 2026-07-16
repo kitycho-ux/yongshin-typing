@@ -1021,17 +1021,17 @@
           </div>
           <div class="tp-field">
             <label>연습 시간</label>
-            <div class="tp-choice-group">
-              <button class="tp-choice" data-stime="30" onclick="selectStartTime(30)">
+            <div class="tp-choice-group" style="flex-wrap:nowrap; gap:6px;">
+              <button class="tp-choice" data-stime="30" onclick="selectStartTime(30)" style="min-width:0; flex:1; padding:10px 4px;">
                 <strong>⏱️ 30초</strong>
               </button>
-              <button class="tp-choice selected" data-stime="60" onclick="selectStartTime(60)">
+              <button class="tp-choice selected" data-stime="60" onclick="selectStartTime(60)" style="min-width:0; flex:1; padding:10px 4px;">
                 <strong>⏱️ 60초</strong>
               </button>
-              <button class="tp-choice" data-stime="90" onclick="selectStartTime(90)">
+              <button class="tp-choice" data-stime="90" onclick="selectStartTime(90)" style="min-width:0; flex:1; padding:10px 4px;">
                 <strong>⏱️ 90초</strong>
               </button>
-              <button class="tp-choice" data-stime="120" onclick="selectStartTime(120)">
+              <button class="tp-choice" data-stime="120" onclick="selectStartTime(120)" style="min-width:0; flex:1; padding:10px 4px;">
                 <strong>⏱️ 120초</strong>
               </button>
             </div>
@@ -1976,6 +1976,12 @@ async function deleteNotice(id){
   }
 }
 
+function openNoticeById(idx){
+  const cache = window._noticeCache;
+  if(!cache || !cache[idx]) return;
+  openNoticeModal(cache[idx].title, cache[idx].body);
+}
+
 function openNoticeModal(title, body){
   document.getElementById('modal-title').textContent = '📌 ' + title;
   document.getElementById('modal-body').textContent = body;
@@ -2067,10 +2073,11 @@ async function loadNoticeList(){
       wrap.innerHTML = '<div class="tp-empty-mini"><div style="font-size:24px;">📭</div><div>공지사항이 없어요.</div></div>';
       return;
     }
-    // 최신 3개만 표시
+    // 전역에 공지 저장 (인덱스로 접근)
+    window._noticeCache = notices.slice(0, 3);
     wrap.innerHTML = '<div class="tp-notice-list">' +
-      notices.slice(0, 3).map(n =>
-        '<div class="tp-notice-card" onclick="openNoticeModal(' + JSON.stringify(n.title) + ',' + JSON.stringify(n.body) + ')">' +
+      window._noticeCache.map((n, i) =>
+        '<div class="tp-notice-card" onclick="openNoticeById(' + i + ')">' +
           '<div class="tp-notice-title">📌 ' + escapeText(n.title) + '</div>' +
           '<div class="tp-notice-body">' + escapeText(n.body) + '</div>' +
         '</div>'
