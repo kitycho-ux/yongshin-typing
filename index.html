@@ -222,12 +222,12 @@
     background:var(--panel);
     border:2px solid var(--line);
     border-radius:14px;
-    padding:24px 20px;
-    font-size:26px;
-    line-height:1.7;
+    padding:32px 24px;
+    font-size:32px;
+    line-height:1.6;
     letter-spacing:0.3px;
     text-align:center;
-    min-height:140px;
+    min-height:180px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -286,9 +286,9 @@
     border:2px solid var(--line);
     color:var(--text);
     border-radius:12px;
-    padding:16px;
+    padding:20px;
     font-family:'Jua', sans-serif;
-    font-size:20px;
+    font-size:26px;
     outline:none;
   }
   input.tp-typebox:focus{ border-color:var(--blue); }
@@ -897,7 +897,7 @@
       <p class="tp-sub" id="login-sub">학년과 반을 선택하고 이름을 눌러주세요.</p>
 
       <!-- STEP 1: 학년/반 선택 -->
-      <div id="step-class" style="display:flex; flex-direction:column; gap:20px;">
+      <div id="step-class" style="display:flex; flex-direction:column; gap:32px;">
         <div class="tp-field">
           <label>학년 선택</label>
           <div class="tp-choice-group">
@@ -1173,8 +1173,10 @@ function selectClass(cls){
 }
 
 function backToClassSelect(){
-  document.getElementById('step-class').style.display = 'block';
-  document.getElementById('step-name').style.display = 'none';
+  const stepClass = document.getElementById('step-class');
+  const stepName = document.getElementById('step-name');
+  if(stepClass){ stepClass.style.display = 'flex'; }
+  if(stepName){ stepName.style.display = 'none'; }
 }
 
 function confirmManualEntry(){
@@ -1278,13 +1280,24 @@ async function updateDashboard(){
 
 function resetIdentity(){
   state.student = null;
-  document.getElementById('step-confirmed').style.display = 'none';
-  document.getElementById('post-identity').style.display = 'none';
-  document.getElementById('login-sub').textContent = '반을 선택하고 이름을 눌러주세요.';
-  document.getElementById('in-class').value = '';
-  document.getElementById('in-number').value = '';
-  document.getElementById('in-name').value = '';
+  try{ localStorage.removeItem('tadak_lastStudent'); } catch(e){}
+  const confirmed = document.getElementById('step-confirmed');
+  const postIdentity = document.getElementById('post-identity');
+  const loginSub = document.getElementById('login-sub');
+  if(confirmed) confirmed.style.display = 'none';
+  if(postIdentity) postIdentity.style.display = 'none';
+  if(loginSub) loginSub.textContent = '반을 선택하고 이름을 눌러주세요.';
+  // 관리자 화면 입력 필드 초기화 (있을 때만)
+  ['in-class', 'in-number', 'in-name'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  // 홈 대시보드도 숨김
+  const dash = document.getElementById('user-dashboard');
+  if(dash) dash.style.display = 'none';
   backToClassSelect();
+  // 로그인 화면으로 이동 (지금 어디에 있든)
+  showScreen('screen-login');
 }
 
 async function saveLastStudent(student){
@@ -1489,27 +1502,63 @@ function advanceSentence(){
   if(state.finished) return;
   const box = document.getElementById('test-input');
   const typed = box.value;
+  const targetLen = state.passage.length;
+  const typedLen = typed.length;
+  const progress = targetLen > 0 ? typedLen / targetLen : 0;
+
+  // 30% 미만은 엔터 무시 + 경고
+  if(progress < 0.3){
+    showNudge('문장을 더 쳐야 넘어갈 수 있어요! ✍️');
+    return;
+  }
+
+  // 정답 글자 수 (친 부분 안에서만 정답 카운트)
   let correct = 0;
-  for(let i = 0; i < typed.length; i++){
+  for(let i = 0; i < typedLen; i++){
     if(typed[i] === state.passage[i]) correct++;
   }
   const correctKeystrokes = countCorrectKeystrokes(typed, state.passage);
+
+  // 30~90%: 안 친 부분(끝까지 안 친 나머지)은 오답으로 처리
+  // 90% 이상: 그대로 진행 (실수로 몇 글자 놓친 경우는 봐줌)
+  let effectiveTypedChars = typedLen;
+  if(progress < 0.9){
+    // 안 친 부분 개수만큼 "오답 글자" 추가 → 정확도 계산에 반영
+    effectiveTypedChars = targetLen;
+  }
+
   state.totalCorrect += correct;
-  state.totalTypedChars += typed.length;
+  state.totalTypedChars += effectiveTypedChars;
   state.totalCorrectKeystrokes += correctKeystrokes;
   state.sentencesDone += 1;
 
-  // 타격감 팝업
-  if(typed.length > 0){
-    const acc = Math.round((correct / typed.length) * 100);
-    const gained = correctKeystrokes * 10; // 정확한 자모수 × 10
-    showHitFeedback(gained, acc);
+  // 타격감 팝업 (실제 친 글자 기준 정확도)
+  if(typedLen > 0){
+    const displayAcc = progress < 0.9
+      ? Math.round((correct / targetLen) * 100)  // 페널티 반영
+      : Math.round((correct / typedLen) * 100);
+    const gained = correctKeystrokes * 10;
+    showHitFeedback(gained, displayAcc);
   }
 
   state.passage = drawNextSentence();
   box.value = '';
   renderPassage('');
   document.getElementById('test-progress').textContent = (state.sentencesDone + 1) + '번째 문장 · 0 / ' + state.passage.length;
+}
+
+function showNudge(msg){
+  const layer = document.getElementById('hit-feedback');
+  if(!layer) return;
+  layer.innerHTML =
+    '<div class="hit-pop" style="color:#ff7a90;">' +
+      '<div class="hit-emoji">⚠️</div>' +
+      '<div class="hit-tag">' + msg + '</div>' +
+    '</div>';
+  const pop = layer.querySelector('.hit-pop');
+  pop.style.animation = 'none';
+  pop.offsetHeight;
+  pop.style.animation = '';
 }
 
 function showHitFeedback(gained, acc){
