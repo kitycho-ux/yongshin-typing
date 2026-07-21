@@ -601,6 +601,98 @@
     white-space:pre-wrap;
     word-break:break-word;
   }
+  .tp-notice-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:5px;
+  }
+  .tp-notice-num{
+    font-family:'Jua', sans-serif;
+    font-size:11px;
+    color:#fff;
+    background:var(--accent);
+    border-radius:10px;
+    padding:2px 8px;
+  }
+  .tp-notice-date{
+    font-family:'Jua', sans-serif;
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  /* 배틀 관련 스타일 */
+  .tp-room-code{
+    font-family:'Jua', sans-serif;
+    font-size:48px;
+    font-weight:700;
+    color:var(--accent);
+    letter-spacing:12px;
+    text-shadow:2px 2px 0 rgba(255,143,171,0.15);
+  }
+  .tp-battle-layout{
+    display:flex;
+    gap:14px;
+    flex-direction:column;
+  }
+  @media (min-width: 900px){
+    .tp-battle-layout{ flex-direction:row; }
+    .tp-battle-left{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:12px; }
+    .tp-battle-right{ flex:0 0 280px; }
+  }
+  .tp-battle-left{ display:flex; flex-direction:column; gap:12px; }
+  .tp-battle-right{
+    background:var(--panel);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+  }
+  .tp-battle-player-row{
+    background:var(--panel2);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:6px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .tp-battle-player-row .rank{
+    font-family:'Jua', sans-serif;
+    font-weight:700;
+    color:var(--accent);
+    min-width:24px;
+  }
+  .tp-battle-player-row .who{ flex:1; font-family:'Jua', sans-serif; }
+  .tp-battle-player-row .score{ font-family:'Jua', sans-serif; color:var(--blue); }
+  .tp-battle-player-row.me{ background:#fff0f5; border:2px solid var(--accent); }
+  .tp-battle-player-row .host-badge{ font-size:11px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:8px; }
+
+  .tp-podium{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:12px;
+    margin:24px 0 20px;
+    min-height:220px;
+  }
+  .tp-podium-item{
+    background:linear-gradient(180deg, #fff, var(--panel2));
+    border:2px solid var(--line);
+    border-radius:16px;
+    padding:16px 12px 12px;
+    text-align:center;
+    flex:1;
+    max-width:130px;
+  }
+  .tp-podium-item.first{ border-color:#ffd85e; box-shadow:0 4px 0 rgba(255,216,94,0.3); }
+  .tp-podium-item.second{ border-color:#d9d9e6; }
+  .tp-podium-item.third{ border-color:#e0a86e; }
+  .tp-podium-medal{ font-size:36px; margin-bottom:6px; }
+  .tp-podium-name{ font-family:'Jua', sans-serif; font-size:14px; margin-bottom:4px; }
+  .tp-podium-score{ font-family:'Jua', sans-serif; color:var(--accent); font-size:20px; font-weight:700; }
+  .tp-podium-item.first{ margin-bottom:20px; padding-top:26px; }
+  .tp-podium-item.first .tp-podium-medal{ font-size:48px; }
+  .tp-podium-item.first .tp-podium-score{ font-size:26px; }
   .tp-notice-title{
     font-family:'Jua', sans-serif;
     font-size:13px;
@@ -907,6 +999,7 @@
           </div>
           <button class="tp-btn" id="home-main-btn" onclick="goPlayerLogin()">🎒 선수 입장</button>
           <button class="tp-btn ghost" onclick="goTeacherGate()">🧑‍🏫 교무실(관리자) 접속</button>
+          <button class="tp-btn ghost" onclick="goBattleLobby()">🎮 라이브 배틀</button>
           <button class="tp-btn ghost" onclick="goRanking()">🏆 랭킹 구경만 할래요</button>
         </div>
 
@@ -1171,6 +1264,114 @@
         <div id="notice-admin-list">
           <div class="tp-loading">불러오는 중...</div>
         </div>
+      </div>
+    </div>
+
+    <!-- BATTLE LOBBY (방 만들기/참가) -->
+    <div class="tp-screen" id="screen-battle-lobby">
+      <button class="tp-back-btn" onclick="goHome();">← 처음으로</button>
+      <h2 class="tp-title">🎮 라이브 배틀</h2>
+      <p class="tp-sub">친구들과 실시간으로 타자 대결해요!</p>
+
+      <div class="tp-field" style="margin-top:12px;">
+        <label>1️⃣ 방 만들기</label>
+        <button class="tp-btn" onclick="createBattleRoom()">🏠 새 방 만들기</button>
+      </div>
+
+      <div class="tp-field" style="margin-top:8px;">
+        <label>2️⃣ 방 참가하기</label>
+        <input class="tp-input" id="battle-room-input" type="text" inputmode="numeric" maxlength="4" placeholder="4자리 방 코드 입력" style="text-align:center; font-size:20px; letter-spacing:6px;">
+        <button class="tp-btn ghost" onclick="joinBattleRoom()">🚪 입장하기</button>
+      </div>
+
+      <p class="tp-sub" id="battle-lobby-error" style="color:var(--warn); display:none;"></p>
+      <p class="tp-sub" id="battle-lobby-msg" style="display:none;"></p>
+    </div>
+
+    <!-- BATTLE WAITING (대기실) -->
+    <div class="tp-screen" id="screen-battle-waiting">
+      <button class="tp-back-btn" onclick="leaveBattleRoom();">← 나가기</button>
+      <div style="text-align:center; padding:14px 0;">
+        <p class="tp-sub" style="margin:0;">방 코드</p>
+        <div class="tp-room-code" id="battle-room-code">----</div>
+      </div>
+
+      <div class="tp-field" id="battle-host-settings" style="display:none;">
+        <label>⚙️ 방장 설정</label>
+        <div class="tp-choice-group" style="flex-wrap:nowrap; gap:6px;">
+          <button class="tp-choice selected" data-blang="ko" onclick="setBattleLang('ko')" style="min-width:0; flex:1;">
+            <strong>한글</strong>
+          </button>
+          <button class="tp-choice" data-blang="en" onclick="setBattleLang('en')" style="min-width:0; flex:1;">
+            <strong>영어</strong>
+          </button>
+        </div>
+        <div class="tp-choice-group" style="flex-wrap:nowrap; gap:6px; margin-top:6px;">
+          <button class="tp-choice" data-bmode="word" onclick="setBattleMode('word')" style="min-width:0; flex:1;">
+            <strong>🎵 단어</strong>
+          </button>
+          <button class="tp-choice selected" data-bmode="sentence" onclick="setBattleMode('sentence')" style="min-width:0; flex:1;">
+            <strong>📝 문장</strong>
+          </button>
+        </div>
+        <div class="tp-choice-group" style="flex-wrap:nowrap; gap:6px; margin-top:6px;">
+          <button class="tp-choice" data-btime="30" onclick="setBattleTime(30)" style="min-width:0; flex:1; padding:10px 4px;">
+            <strong>30초</strong>
+          </button>
+          <button class="tp-choice selected" data-btime="60" onclick="setBattleTime(60)" style="min-width:0; flex:1; padding:10px 4px;">
+            <strong>60초</strong>
+          </button>
+          <button class="tp-choice" data-btime="90" onclick="setBattleTime(90)" style="min-width:0; flex:1; padding:10px 4px;">
+            <strong>90초</strong>
+          </button>
+          <button class="tp-choice" data-btime="120" onclick="setBattleTime(120)" style="min-width:0; flex:1; padding:10px 4px;">
+            <strong>120초</strong>
+          </button>
+        </div>
+      </div>
+
+      <div class="tp-field">
+        <label id="battle-players-label">👥 참가자 (0명)</label>
+        <div id="battle-players-list"></div>
+      </div>
+
+      <div id="battle-host-start-wrap" style="display:none;">
+        <button class="tp-btn" onclick="startBattle()">🚀 게임 시작!</button>
+      </div>
+      <p class="tp-sub" id="battle-waiting-info" style="text-align:center;">방장이 시작하면 게임이 시작돼요.</p>
+    </div>
+
+    <!-- BATTLE GAME (게임 중) -->
+    <div class="tp-screen" id="screen-battle-game">
+      <div class="tp-battle-layout">
+        <div class="tp-battle-left">
+          <div id="battle-hit-feedback"></div>
+          <div class="tp-stats-bar">
+            <span id="battle-who"></span>
+            <span class="tp-timer" id="battle-timer">60</span>
+          </div>
+          <div class="tp-passage" id="battle-passage"></div>
+          <input class="tp-typebox" id="battle-input" placeholder="여기에 입력하세요..." autocomplete="off">
+          <p class="tp-sub" id="battle-progress" style="text-align:center;">준비...</p>
+        </div>
+        <div class="tp-battle-right">
+          <h3 class="tp-card-title" style="margin:0 0 8px;">🏆 실시간 순위</h3>
+          <div id="battle-live-rank"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTLE RESULT (결과) -->
+    <div class="tp-screen" id="screen-battle-result">
+      <h2 class="tp-title" style="text-align:center;">🎉 결과 발표!</h2>
+      <div class="tp-podium" id="battle-podium"></div>
+      <div class="tp-field">
+        <label>전체 순위</label>
+        <div id="battle-full-rank"></div>
+      </div>
+      <div id="battle-result-buttons">
+        <button class="tp-btn" id="battle-again-btn" onclick="rematchBattle()" style="display:none;">🔄 한 판 더!</button>
+        <button class="tp-btn ghost" onclick="leaveBattleRoom()">🏠 방 나가기</button>
       </div>
     </div>
 
@@ -1980,12 +2181,22 @@ async function deleteNotice(id){
 function openNoticeById(idx){
   const cache = window._noticeCache;
   if(!cache || !cache[idx]) return;
-  openNoticeModal(cache[idx].title, cache[idx].body);
+  const n = cache[idx];
+  openNoticeModal(n.title, n.body, formatNoticeDate(n.at), idx + 1);
 }
 
-function openNoticeModal(title, body){
+function openNoticeModal(title, body, date, num){
   document.getElementById('modal-title').textContent = '📌 ' + title;
   document.getElementById('modal-body').textContent = body;
+  // 날짜/번호 표시
+  let meta = document.getElementById('modal-meta');
+  if(!meta){
+    meta = document.createElement('p');
+    meta.id = 'modal-meta';
+    meta.style.cssText = 'font-size:12px; color:var(--muted); margin:0 0 12px; font-family:Jua,sans-serif;';
+    document.getElementById('modal-body').before(meta);
+  }
+  meta.textContent = (num ? '공지 ' + num + '번 · ' : '') + (date || '');
   const modal = document.getElementById('notice-modal');
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2079,6 +2290,10 @@ async function loadNoticeList(){
     wrap.innerHTML = '<div class="tp-notice-list">' +
       window._noticeCache.map((n, i) =>
         '<div class="tp-notice-card" onclick="openNoticeById(' + i + ')">' +
+          '<div class="tp-notice-meta">' +
+            '<span class="tp-notice-num">공지 ' + (i + 1) + '</span>' +
+            '<span class="tp-notice-date">' + formatNoticeDate(n.at) + '</span>' +
+          '</div>' +
           '<div class="tp-notice-title">📌 ' + escapeText(n.title) + '</div>' +
           '<div class="tp-notice-body">' + escapeText(n.body) + '</div>' +
         '</div>'
@@ -2093,6 +2308,519 @@ function goRanking(){
   showScreen('screen-rank');
   loadRanking();
 }
+
+// ============================================
+// 라이브 배틀
+// ============================================
+let battleState = {
+  roomCode: null,
+  isHost: false,
+  players: [],
+  settings: { lang: 'ko', mode: 'sentence', timeLimit: 60 },
+  status: 'waiting',
+  pollTimer: null,
+  gameTimer: null,
+  gameStart: 0,
+  passage: '',
+  queue: [],
+  queueIndex: 0,
+  totalKeystrokes: 0,
+  totalCorrect: 0,
+  totalTyped: 0,
+  sentencesDone: 0
+};
+
+function goBattleLobby(){
+  if(!state.student){
+    alert('먼저 선수 입장하고 이용해주세요!');
+    return;
+  }
+  document.getElementById('battle-room-input').value = '';
+  document.getElementById('battle-lobby-error').style.display = 'none';
+  document.getElementById('battle-lobby-msg').style.display = 'none';
+  showScreen('screen-battle-lobby');
+}
+
+async function createBattleRoom(){
+  const msg = document.getElementById('battle-lobby-msg');
+  msg.textContent = '방 만드는 중...';
+  msg.style.color = 'var(--muted)';
+  msg.style.display = 'block';
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'createRoom',
+        host: state.student.name,
+        hostCls: state.student.cls,
+        hostNumber: state.student.number
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      battleState.roomCode = data.code;
+      battleState.isHost = true;
+      enterWaitingRoom();
+    } else {
+      msg.textContent = '방 생성 실패';
+      msg.style.color = 'var(--warn)';
+    }
+  } catch(e){
+    msg.textContent = '방 생성 실패: ' + e.message;
+    msg.style.color = 'var(--warn)';
+  }
+}
+
+async function joinBattleRoom(){
+  const code = document.getElementById('battle-room-input').value.trim();
+  const err = document.getElementById('battle-lobby-error');
+  if(!/^\d{4}$/.test(code)){
+    err.textContent = '4자리 숫자를 입력해주세요.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'joinRoom',
+        code: code,
+        name: state.student.name,
+        cls: state.student.cls,
+        number: state.student.number
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      battleState.roomCode = code;
+      battleState.isHost = false;
+      enterWaitingRoom();
+    } else {
+      err.textContent = data.error || '방을 찾을 수 없어요.';
+      err.style.display = 'block';
+    }
+  } catch(e){
+    err.textContent = '접속 실패: ' + e.message;
+    err.style.display = 'block';
+  }
+}
+
+function enterWaitingRoom(){
+  document.getElementById('battle-room-code').textContent = battleState.roomCode;
+  document.getElementById('battle-host-settings').style.display = battleState.isHost ? 'block' : 'none';
+  document.getElementById('battle-host-start-wrap').style.display = battleState.isHost ? 'block' : 'none';
+  document.getElementById('battle-waiting-info').style.display = battleState.isHost ? 'none' : 'block';
+  showScreen('screen-battle-waiting');
+  startBattlePolling();
+}
+
+function startBattlePolling(){
+  stopBattlePolling();
+  pollBattleRoom();
+  battleState.pollTimer = setInterval(pollBattleRoom, 3000);
+}
+
+function stopBattlePolling(){
+  if(battleState.pollTimer){
+    clearInterval(battleState.pollTimer);
+    battleState.pollTimer = null;
+  }
+}
+
+async function pollBattleRoom(){
+  if(!battleState.roomCode) return;
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=roomStatus&code=' + battleState.roomCode);
+    const data = await res.json();
+    if(!data || !data.room){
+      // 방이 사라짐 → 나가기
+      alert('방이 삭제되었습니다.');
+      leaveBattleRoom();
+      return;
+    }
+    handleRoomUpdate(data.room);
+  } catch(e){
+    console.error('폴링 실패', e);
+  }
+}
+
+function handleRoomUpdate(room){
+  battleState.players = room.players || [];
+  battleState.settings = room.settings || battleState.settings;
+  const prevStatus = battleState.status;
+  battleState.status = room.status;
+
+  const activeScreen = document.querySelector('.tp-screen.active');
+  const currentScreen = activeScreen ? activeScreen.id : '';
+
+  if(room.status === 'waiting'){
+    if(currentScreen === 'screen-battle-waiting'){
+      renderWaitingRoom();
+    }
+  } else if(room.status === 'playing'){
+    if(currentScreen === 'screen-battle-waiting'){
+      // 방장이 시작함 → 게임 시작
+      startBattleGame(room);
+    } else if(currentScreen === 'screen-battle-game'){
+      // 게임 중 - 순위판 업데이트
+      renderBattleLiveRank();
+    }
+  } else if(room.status === 'finished'){
+    if(currentScreen === 'screen-battle-game' || currentScreen === 'screen-battle-waiting'){
+      showBattleResult();
+    }
+  }
+}
+
+function renderWaitingRoom(){
+  const list = document.getElementById('battle-players-list');
+  const label = document.getElementById('battle-players-label');
+  label.textContent = '👥 참가자 (' + battleState.players.length + '명)';
+  list.innerHTML = battleState.players.map(p => {
+    const isMe = state.student && String(p.cls) === String(state.student.cls) && String(p.number) === String(state.student.number);
+    return '<div class="tp-battle-player-row' + (isMe ? ' me' : '') + '">' +
+      '<span class="who">' + p.cls + '반 ' + p.number + '번 ' + p.name + '</span>' +
+      (p.isHost ? '<span class="host-badge">방장</span>' : '') +
+    '</div>';
+  }).join('');
+
+  // 방장 설정 UI 동기화
+  if(battleState.isHost){
+    document.querySelectorAll('[data-blang]').forEach(b => b.classList.toggle('selected', b.dataset.blang === battleState.settings.lang));
+    document.querySelectorAll('[data-bmode]').forEach(b => b.classList.toggle('selected', b.dataset.bmode === battleState.settings.mode));
+    document.querySelectorAll('[data-btime]').forEach(b => b.classList.toggle('selected', Number(b.dataset.btime) === battleState.settings.timeLimit));
+  }
+}
+
+async function setBattleLang(lang){
+  battleState.settings.lang = lang;
+  document.querySelectorAll('[data-blang]').forEach(b => b.classList.toggle('selected', b.dataset.blang === lang));
+  updateBattleSettings();
+}
+async function setBattleMode(mode){
+  battleState.settings.mode = mode;
+  document.querySelectorAll('[data-bmode]').forEach(b => b.classList.toggle('selected', b.dataset.bmode === mode));
+  updateBattleSettings();
+}
+async function setBattleTime(t){
+  battleState.settings.timeLimit = t;
+  document.querySelectorAll('[data-btime]').forEach(b => b.classList.toggle('selected', Number(b.dataset.btime) === t));
+  updateBattleSettings();
+}
+
+async function updateBattleSettings(){
+  if(!battleState.isHost || !battleState.roomCode) return;
+  try{
+    await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'updateSettings',
+        code: battleState.roomCode,
+        settings: battleState.settings
+      })
+    });
+  } catch(e){ console.error('설정 업데이트 실패', e); }
+}
+
+async function startBattle(){
+  if(!battleState.isHost || !battleState.roomCode) return;
+  try{
+    await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'startRoom',
+        code: battleState.roomCode
+      })
+    });
+  } catch(e){ console.error('시작 실패', e); }
+}
+
+function startBattleGame(room){
+  const s = battleState.settings;
+  battleState.queue = buildQueue(s.lang, s.mode);
+  battleState.queueIndex = 0;
+  battleState.passage = battleState.queue[0];
+  battleState.queueIndex = 1;
+  battleState.totalKeystrokes = 0;
+  battleState.totalCorrect = 0;
+  battleState.totalTyped = 0;
+  battleState.sentencesDone = 0;
+  battleState.gameStart = Date.now();
+  const gameEndAt = battleState.gameStart + s.timeLimit * 1000;
+
+  document.getElementById('battle-who').textContent = state.student.name;
+  document.getElementById('battle-timer').textContent = s.timeLimit;
+  renderBattlePassage('');
+  const input = document.getElementById('battle-input');
+  input.value = '';
+  input.disabled = false;
+  input.oninput = onBattleInput;
+  input.onkeydown = onBattleEnterKey;
+  document.getElementById('battle-progress').textContent = '1번째 문장 · 0 / ' + battleState.passage.length;
+
+  showScreen('screen-battle-game');
+  setTimeout(() => input.focus(), 100);
+
+  // 타이머
+  if(battleState.gameTimer) clearInterval(battleState.gameTimer);
+  battleState.gameTimer = setInterval(() => {
+    const remaining = Math.max(0, Math.ceil((gameEndAt - Date.now()) / 1000));
+    document.getElementById('battle-timer').textContent = remaining;
+    if(remaining === 0){
+      clearInterval(battleState.gameTimer);
+      finishBattleGame();
+    }
+  }, 200);
+}
+
+function renderBattlePassage(typed){
+  const target = battleState.passage;
+  let html = '';
+  for(let i = 0; i < target.length; i++){
+    const ch = target[i] === ' ' ? '&nbsp;' : escapeHtml(target[i]);
+    if(i < typed.length){
+      html += '<span class="' + (typed[i] === target[i] ? 'correct' : 'wrong') + '">' + ch + '</span>';
+    } else if(i === typed.length){
+      html += '<span class="pending cursor">' + ch + '</span>';
+    } else {
+      html += '<span class="pending">' + ch + '</span>';
+    }
+  }
+  const el = document.getElementById('battle-passage');
+  el.innerHTML = html;
+  adjustPassageFontSize(el, target.length);
+}
+
+function onBattleInput(){
+  const input = document.getElementById('battle-input');
+  let typed = input.value;
+  if(typed.length > battleState.passage.length){
+    typed = typed.slice(0, battleState.passage.length);
+    input.value = typed;
+  }
+  renderBattlePassage(typed);
+  document.getElementById('battle-progress').textContent = (battleState.sentencesDone + 1) + '번째 문장 · ' + typed.length + ' / ' + battleState.passage.length;
+
+  // 3초마다 점수 서버로 전송 (throttle)
+  const now = Date.now();
+  if(!battleState._lastSync || now - battleState._lastSync > 2500){
+    battleState._lastSync = now;
+    sendBattleScore(typed);
+  }
+}
+
+function onBattleEnterKey(e){
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    advanceBattleSentence();
+  }
+}
+
+function advanceBattleSentence(){
+  const input = document.getElementById('battle-input');
+  const typed = input.value;
+  const targetLen = battleState.passage.length;
+  const progress = targetLen > 0 ? typed.length / targetLen : 0;
+
+  if(progress < 0.3){
+    showNudge('문장을 더 쳐야 넘어갈 수 있어요! ✍️');
+    return;
+  }
+
+  let correct = 0;
+  for(let i = 0; i < typed.length; i++){
+    if(typed[i] === battleState.passage[i]) correct++;
+  }
+  const keystrokes = countCorrectKeystrokes(typed, battleState.passage);
+  battleState.totalCorrect += correct;
+  battleState.totalKeystrokes += keystrokes;
+  battleState.totalTyped += (progress < 0.9) ? targetLen : typed.length;
+  battleState.sentencesDone += 1;
+
+  if(typed.length > 0){
+    const acc = progress < 0.9
+      ? Math.round((correct / targetLen) * 100)
+      : Math.round((correct / typed.length) * 100);
+    // 배틀에서는 hit-feedback을 battle-hit-feedback으로
+    const layer = document.getElementById('battle-hit-feedback');
+    if(layer){
+      const gained = keystrokes * 10;
+      let color, emoji, tag;
+      if(acc >= 95){ color = '#57c99b'; emoji = '💥'; tag = 'PERFECT!'; }
+      else if(acc >= 80){ color = '#a9a0ff'; emoji = '✨'; tag = 'GOOD!'; }
+      else if(acc >= 60){ color = '#ff8fab'; emoji = '👍'; tag = 'NICE!'; }
+      else { color = '#ff7a90'; emoji = '💦'; tag = '괜찮아요!'; }
+      layer.innerHTML =
+        '<div class="hit-pop" style="color:'+color+';">' +
+          '<div class="hit-emoji">'+emoji+'</div>' +
+          '<div class="hit-score">+'+gained+'</div>' +
+          '<div class="hit-tag">'+tag+' · '+acc+'%</div>' +
+        '</div>';
+    }
+  }
+
+  // 다음 문장
+  if(battleState.queueIndex >= battleState.queue.length){
+    battleState.queue = buildQueue(battleState.settings.lang, battleState.settings.mode);
+    battleState.queueIndex = 0;
+  }
+  battleState.passage = battleState.queue[battleState.queueIndex];
+  battleState.queueIndex++;
+  input.value = '';
+  renderBattlePassage('');
+  document.getElementById('battle-progress').textContent = (battleState.sentencesDone + 1) + '번째 문장 · 0 / ' + battleState.passage.length;
+}
+
+async function sendBattleScore(typed){
+  if(!battleState.roomCode) return;
+  const elapsedMin = Math.max((Date.now() - battleState.gameStart) / 60000, 0.01);
+  let curCorrect = 0;
+  for(let i = 0; i < typed.length; i++){
+    if(typed[i] === battleState.passage[i]) curCorrect++;
+  }
+  const curKeystrokes = countCorrectKeystrokes(typed, battleState.passage);
+  const totalK = battleState.totalKeystrokes + curKeystrokes;
+  const totalC = battleState.totalCorrect + curCorrect;
+  const totalT = battleState.totalTyped + typed.length;
+  const cpm = Math.round(totalK / elapsedMin);
+  const accuracy = totalT > 0 ? Math.round((totalC / totalT) * 100) : 100;
+  const adjusted = Math.round(cpm * (accuracy / 100));
+
+  try{
+    await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'updateScore',
+        code: battleState.roomCode,
+        cls: state.student.cls,
+        number: state.student.number,
+        score: adjusted,
+        accuracy: accuracy
+      })
+    });
+  } catch(e){ console.error('점수 전송 실패', e); }
+}
+
+async function finishBattleGame(){
+  const input = document.getElementById('battle-input');
+  input.disabled = true;
+  const typed = input.value;
+
+  // 최종 점수 계산 및 전송
+  const elapsedMin = Math.max(battleState.settings.timeLimit / 60, 1/60);
+  let curCorrect = 0;
+  for(let i = 0; i < typed.length; i++){
+    if(typed[i] === battleState.passage[i]) curCorrect++;
+  }
+  const curKeystrokes = countCorrectKeystrokes(typed, battleState.passage);
+  const totalK = battleState.totalKeystrokes + curKeystrokes;
+  const totalC = battleState.totalCorrect + curCorrect;
+  const totalT = battleState.totalTyped + typed.length;
+  const cpm = Math.round(totalK / elapsedMin);
+  const accuracy = totalT > 0 ? Math.round((totalC / totalT) * 100) : 100;
+  const adjusted = Math.round(cpm * (accuracy / 100));
+
+  try{
+    await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'finishScore',
+        code: battleState.roomCode,
+        cls: state.student.cls,
+        number: state.student.number,
+        score: adjusted,
+        accuracy: accuracy
+      })
+    });
+  } catch(e){ console.error('종료 전송 실패', e); }
+}
+
+function renderBattleLiveRank(){
+  const wrap = document.getElementById('battle-live-rank');
+  if(!wrap) return;
+  const sorted = [...battleState.players].sort((a,b) => (b.score||0) - (a.score||0));
+  const me = state.student;
+  wrap.innerHTML = sorted.map((p, i) => {
+    const isMe = me && String(p.cls) === String(me.cls) && String(p.number) === String(me.number);
+    return '<div class="tp-battle-player-row' + (isMe ? ' me' : '') + '">' +
+      '<span class="rank">' + (i+1) + '</span>' +
+      '<span class="who">' + p.name + '</span>' +
+      '<span class="score">' + (p.score || 0) + '타</span>' +
+    '</div>';
+  }).join('');
+}
+
+function showBattleResult(){
+  if(battleState.gameTimer){ clearInterval(battleState.gameTimer); battleState.gameTimer = null; }
+  const sorted = [...battleState.players].sort((a,b) => (b.score||0) - (a.score||0));
+  const podium = document.getElementById('battle-podium');
+  const medals = ['🥇', '🥈', '🥉'];
+  const cls = ['first', 'second', 'third'];
+  const order = [1, 0, 2]; // 2등, 1등, 3등 순서로 렌더
+  podium.innerHTML = order.map(idx => {
+    const p = sorted[idx];
+    if(!p) return '<div class="tp-podium-item ' + cls[idx] + '"></div>';
+    return '<div class="tp-podium-item ' + cls[idx] + '">' +
+      '<div class="tp-podium-medal">' + medals[idx] + '</div>' +
+      '<div class="tp-podium-name">' + p.name + '</div>' +
+      '<div class="tp-podium-score">' + (p.score || 0) + '타</div>' +
+    '</div>';
+  }).join('');
+
+  const full = document.getElementById('battle-full-rank');
+  const me = state.student;
+  full.innerHTML = sorted.map((p, i) => {
+    const isMe = me && String(p.cls) === String(me.cls) && String(p.number) === String(me.number);
+    return '<div class="tp-battle-player-row' + (isMe ? ' me' : '') + '">' +
+      '<span class="rank">' + (i+1) + '</span>' +
+      '<span class="who">' + p.cls + '반 ' + p.number + '번 ' + p.name + '</span>' +
+      '<span class="score">' + (p.score || 0) + '타 · ' + (p.accuracy || 0) + '%</span>' +
+    '</div>';
+  }).join('');
+
+  // 방장만 "한 판 더" 버튼 보임
+  document.getElementById('battle-again-btn').style.display = battleState.isHost ? 'block' : 'none';
+  showScreen('screen-battle-result');
+}
+
+async function rematchBattle(){
+  if(!battleState.isHost) return;
+  try{
+    await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'resetRoom',
+        code: battleState.roomCode
+      })
+    });
+    enterWaitingRoom();
+  } catch(e){ console.error('재시작 실패', e); }
+}
+
+async function leaveBattleRoom(){
+  stopBattlePolling();
+  if(battleState.gameTimer){ clearInterval(battleState.gameTimer); battleState.gameTimer = null; }
+  if(battleState.roomCode){
+    try{
+      await fetch(MEAL_SERVER_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'leaveRoom',
+          code: battleState.roomCode,
+          cls: state.student ? state.student.cls : '',
+          number: state.student ? state.student.number : '',
+          isHost: battleState.isHost
+        })
+      });
+    } catch(e){}
+  }
+  battleState.roomCode = null;
+  battleState.isHost = false;
+  battleState.players = [];
+  goHome();
+}
+
 
 function setScope(scope){
   state.rankScope = scope;
