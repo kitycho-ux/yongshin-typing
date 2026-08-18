@@ -547,6 +547,51 @@
     padding:20px;
   }
   #start-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
+  #student-edit-modal{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(91,74,95,0.45);
+    backdrop-filter:blur(4px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #student-edit-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
+
+  .tp-sa-student-item{
+    background:var(--panel2);
+    border-radius:10px;
+    padding:10px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:6px;
+    cursor:pointer;
+    transition:transform .1s;
+  }
+  .tp-sa-student-item:hover{ transform:translateX(3px); background:#fff0f5; }
+  .tp-sa-student-item .name{ font-family:'Jua',sans-serif; }
+  .tp-sa-student-item .badge-added{
+    font-size:10px;
+    background:var(--mint);
+    color:#fff;
+    padding:2px 8px;
+    border-radius:8px;
+  }
+  .tp-sa-class-tab{
+    background:var(--panel);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:6px 14px;
+    cursor:pointer;
+    font-family:'Jua',sans-serif;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .tp-sa-class-tab.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
   @keyframes modalFadeIn{
     from{ opacity:0; transform:scale(0.95); }
     to{ opacity:1; transform:scale(1); }
@@ -1241,8 +1286,64 @@
       <div class="tp-field">
         <label>⚙️ 관리 기능</label>
         <button class="tp-btn ghost" onclick="goNoticeAdmin()">📢 공지사항 관리</button>
+        <button class="tp-btn ghost" onclick="goStudentAdmin()" style="margin-top:8px;">👥 학생 명단 관리</button>
       </div>
       <p class="tp-sub" id="manual-error" style="color:var(--warn); display:none;"></p>
+    </div>
+
+    <!-- STUDENT ADMIN -->
+    <div class="tp-screen" id="screen-student-admin">
+      <button class="tp-back-btn" onclick="goHome();">← 처음으로</button>
+      <h2 class="tp-title">학생 명단 관리 👥</h2>
+      <p class="tp-sub">전학생 추가, 이름 수정, 삭제를 할 수 있어요.</p>
+
+      <div class="tp-field">
+        <label>➕ 새 학생 추가</label>
+        <div class="tp-row">
+          <div class="tp-field" style="flex:0 0 90px;">
+            <input class="tp-input" id="sa-cls" type="number" min="1" max="9" placeholder="반">
+          </div>
+          <div class="tp-field" style="flex:0 0 90px;">
+            <input class="tp-input" id="sa-num" type="number" min="1" max="40" placeholder="번호">
+          </div>
+          <div class="tp-field" style="flex:1;">
+            <input class="tp-input" id="sa-name" type="text" placeholder="이름">
+          </div>
+        </div>
+        <button class="tp-btn" onclick="submitAddStudent()">➕ 추가하기</button>
+        <p class="tp-sub" id="sa-msg" style="display:none;"></p>
+      </div>
+
+      <div class="tp-field">
+        <label>📋 반별 명단 (기본 명단 + 추가된 학생)</label>
+        <div class="tp-choice-group" id="sa-class-tabs" style="flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+        <div id="sa-student-list"></div>
+      </div>
+    </div>
+
+    <!-- 학생 편집/삭제 모달 -->
+    <div id="student-edit-modal" onclick="closeStudentEditModal(event)">
+      <div class="tp-modal-box" onclick="event.stopPropagation()" style="max-width:420px;">
+        <div class="tp-modal-head">
+          <h2 class="tp-modal-title" id="sem-title">학생 정보</h2>
+          <button class="tp-modal-close" onclick="closeStudentEditModal()">✕</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <p class="tp-sub" style="margin:0;" id="sem-info"></p>
+          <div class="tp-field">
+            <label>이름 수정</label>
+            <input class="tp-input" id="sem-name" type="text">
+            <button class="tp-btn" onclick="submitEditStudent()">✏️ 이름 변경</button>
+          </div>
+          <div class="tp-field">
+            <label>학생 삭제</label>
+            <p class="tp-sub" style="margin:0 0 8px; font-size:12px;">전학생만 삭제할 수 있어요 (기본 명단은 코드에 있어 삭제 불가).</p>
+            <button class="tp-btn" style="background:var(--warn); border-color:var(--warn);" onclick="submitDeleteStudent(false)">🗑️ 학생만 삭제</button>
+            <button class="tp-btn ghost" style="margin-top:6px; color:var(--warn); border-color:var(--warn);" onclick="submitDeleteStudent(true)">🗑️ 학생 + 랭킹 기록 함께 삭제</button>
+          </div>
+          <p class="tp-sub" id="sem-msg" style="display:none;"></p>
+        </div>
+      </div>
     </div>
 
     <!-- NOTICE ADMIN -->
@@ -1516,7 +1617,7 @@ function renderClassButtons(){
 
 function selectClass(cls){
   state.selectedClass = String(cls);
-  const roster = ROSTER[state.selectedClass] || [];
+  const roster = getRosterForClass(Number(state.selectedClass));
   const grid = document.getElementById('roster-grid');
   document.getElementById('name-picker-label').textContent = '[' + cls + '반] 이름 선택';
   grid.innerHTML = roster.map(s =>
@@ -2310,6 +2411,305 @@ function goRanking(){
 }
 
 // ============================================
+// 학생 명단 관리 (하이브리드 방식)
+// ============================================
+let studentAdminState = {
+  addedStudents: [],   // 서버에서 온 전학생 목록
+  currentClass: 1,     // 현재 선택된 반
+  editing: null        // 편집 중인 학생
+};
+
+function goStudentAdmin(){
+  showScreen('screen-student-admin');
+  document.getElementById('sa-msg').style.display = 'none';
+  document.getElementById('sa-cls').value = '';
+  document.getElementById('sa-num').value = '';
+  document.getElementById('sa-name').value = '';
+  renderStudentAdminTabs();
+  loadStudentAdminList();
+}
+
+function renderStudentAdminTabs(){
+  const tabs = document.getElementById('sa-class-tabs');
+  let html = '';
+  for(let i = 1; i <= 9; i++){
+    html += '<button class="tp-sa-class-tab' + (i === studentAdminState.currentClass ? ' active' : '') + '" onclick="switchStudentClass(' + i + ')">' + i + '반</button>';
+  }
+  tabs.innerHTML = html;
+}
+
+function switchStudentClass(cls){
+  studentAdminState.currentClass = cls;
+  renderStudentAdminTabs();
+  renderStudentAdminList();
+}
+
+async function loadStudentAdminList(){
+  const wrap = document.getElementById('sa-student-list');
+  wrap.innerHTML = '<div class="tp-loading">불러오는 중...</div>';
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=addedStudents');
+    const data = await res.json();
+    studentAdminState.addedStudents = data.students || [];
+    renderStudentAdminList();
+  } catch(e){
+    console.error('명단 로드 실패', e);
+    studentAdminState.addedStudents = [];
+    renderStudentAdminList();
+  }
+}
+
+function getMergedStudents(cls){
+  // 기본 명단 (ROSTER의 해당 반)
+  const base = (ROSTER[cls] || []).map(s => ({
+    cls: cls, number: s.number, name: s.name, source: 'base'
+  }));
+  // 서버에 추가된 학생 (같은 반)
+  const added = studentAdminState.addedStudents
+    .filter(s => Number(s.cls) === cls)
+    .map(s => ({ cls: cls, number: Number(s.number), name: s.name, source: 'added' }));
+
+  // 병합: 같은 반+번호는 added가 우선
+  const map = new Map();
+  base.forEach(s => map.set(s.number, s));
+  added.forEach(s => map.set(s.number, s));
+  return Array.from(map.values()).sort((a, b) => a.number - b.number);
+}
+
+function renderStudentAdminList(){
+  const wrap = document.getElementById('sa-student-list');
+  const cls = studentAdminState.currentClass;
+  const students = getMergedStudents(cls);
+  if(students.length === 0){
+    wrap.innerHTML = '<div class="tp-empty-mini"><div>이 반에는 학생이 없어요.</div></div>';
+    return;
+  }
+  wrap.innerHTML = students.map((s, idx) =>
+    '<div class="tp-sa-student-item" onclick="openStudentEditModal(' + idx + ')">' +
+      '<span class="name">' + s.number + '번 ' + escapeText(s.name) + '</span>' +
+      (s.source === 'added' ? '<span class="badge-added">추가됨</span>' : '') +
+    '</div>'
+  ).join('');
+  window._saCurrentList = students;
+}
+
+async function submitAddStudent(){
+  const cls = document.getElementById('sa-cls').value.trim();
+  const num = document.getElementById('sa-num').value.trim();
+  const name = document.getElementById('sa-name').value.trim();
+  const msg = document.getElementById('sa-msg');
+  if(!cls || !num || !name){
+    msg.textContent = '반, 번호, 이름을 모두 입력해주세요.';
+    msg.style.color = 'var(--warn)';
+    msg.style.display = 'block';
+    return;
+  }
+  const clsNum = Number(cls);
+  const numNum = Number(num);
+  if(clsNum < 1 || clsNum > 9){
+    msg.textContent = '반은 1~9 사이여야 해요.';
+    msg.style.color = 'var(--warn)';
+    msg.style.display = 'block';
+    return;
+  }
+  // 중복 체크
+  const existing = findExistingStudent(clsNum, numNum);
+  if(existing){
+    // 이미 있는 번호 → 이름 수정 확인 팝업
+    if(confirm(clsNum + '반 ' + numNum + '번에 이미 "' + existing.name + '"이 있어요.\n"' + name + '"으로 이름을 수정할까요?')){
+      await callEditStudent(clsNum, numNum, name);
+      msg.textContent = '✅ 이름을 수정했어요!';
+      msg.style.color = 'var(--mint)';
+      msg.style.display = 'block';
+      document.getElementById('sa-name').value = '';
+      studentAdminState.currentClass = clsNum;
+      renderStudentAdminTabs();
+      loadStudentAdminList();
+    }
+    return;
+  }
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'addStudent',
+        cls: clsNum, number: numNum, name: name
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      msg.textContent = '✅ 학생을 추가했어요!';
+      msg.style.color = 'var(--mint)';
+      msg.style.display = 'block';
+      document.getElementById('sa-cls').value = '';
+      document.getElementById('sa-num').value = '';
+      document.getElementById('sa-name').value = '';
+      studentAdminState.currentClass = clsNum;
+      renderStudentAdminTabs();
+      loadStudentAdminList();
+    } else {
+      msg.textContent = '❌ 추가 실패: ' + (data.error || '알 수 없는 오류');
+      msg.style.color = 'var(--warn)';
+      msg.style.display = 'block';
+    }
+  } catch(e){
+    msg.textContent = '❌ 추가 실패: ' + e.message;
+    msg.style.color = 'var(--warn)';
+    msg.style.display = 'block';
+  }
+}
+
+function findExistingStudent(cls, number){
+  // 기본 명단에 있는지
+  const baseList = ROSTER[cls] || [];
+  const inBase = baseList.find(s => s.number === number);
+  if(inBase) return { name: inBase.name, source: 'base' };
+  // 서버에 추가된 학생 중에 있는지
+  const inAdded = studentAdminState.addedStudents.find(s => Number(s.cls) === cls && Number(s.number) === number);
+  if(inAdded) return { name: inAdded.name, source: 'added' };
+  return null;
+}
+
+function openStudentEditModal(idx){
+  const list = window._saCurrentList || [];
+  const s = list[idx];
+  if(!s) return;
+  studentAdminState.editing = s;
+  document.getElementById('sem-title').textContent = '학생 정보';
+  document.getElementById('sem-info').textContent = s.cls + '반 ' + s.number + '번 (' + (s.source === 'added' ? '추가된 학생' : '기본 명단') + ')';
+  document.getElementById('sem-name').value = s.name;
+  document.getElementById('sem-msg').style.display = 'none';
+  document.getElementById('student-edit-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStudentEditModal(e){
+  if(e && e.target !== document.getElementById('student-edit-modal')) return;
+  document.getElementById('student-edit-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  studentAdminState.editing = null;
+}
+
+async function submitEditStudent(){
+  const s = studentAdminState.editing;
+  if(!s) return;
+  const newName = document.getElementById('sem-name').value.trim();
+  const msg = document.getElementById('sem-msg');
+  if(!newName){
+    msg.textContent = '이름을 입력해주세요.';
+    msg.style.color = 'var(--warn)';
+    msg.style.display = 'block';
+    return;
+  }
+  if(newName === s.name){
+    closeStudentEditModal({target: document.getElementById('student-edit-modal')});
+    return;
+  }
+  await callEditStudent(s.cls, s.number, newName);
+  msg.textContent = '✅ 이름을 수정했어요!';
+  msg.style.color = 'var(--mint)';
+  msg.style.display = 'block';
+  loadStudentAdminList();
+  setTimeout(() => closeStudentEditModal({target: document.getElementById('student-edit-modal')}), 800);
+}
+
+async function callEditStudent(cls, number, name){
+  try{
+    await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'editStudent',
+        cls: cls, number: number, name: name
+      })
+    });
+  } catch(e){ console.error('편집 실패', e); }
+}
+
+async function submitDeleteStudent(alsoDeleteRanking){
+  const s = studentAdminState.editing;
+  if(!s) return;
+  const msg = document.getElementById('sem-msg');
+  if(s.source === 'base'){
+    msg.textContent = '기본 명단의 학생은 삭제할 수 없어요.';
+    msg.style.color = 'var(--warn)';
+    msg.style.display = 'block';
+    return;
+  }
+  const rankingMsg = alsoDeleteRanking ? '\n\n⚠️ 랭킹 기록도 함께 삭제됩니다.' : '';
+  if(!confirm('정말 ' + s.cls + '반 ' + s.number + '번 ' + s.name + '을(를) 삭제할까요?' + rankingMsg)) return;
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'deleteStudent',
+        cls: s.cls, number: s.number,
+        alsoDeleteRanking: alsoDeleteRanking
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      msg.textContent = '✅ 삭제했어요!';
+      msg.style.color = 'var(--mint)';
+      msg.style.display = 'block';
+      loadStudentAdminList();
+      setTimeout(() => closeStudentEditModal({target: document.getElementById('student-edit-modal')}), 800);
+    } else {
+      msg.textContent = '❌ 삭제 실패';
+      msg.style.color = 'var(--warn)';
+      msg.style.display = 'block';
+    }
+  } catch(e){
+    msg.textContent = '❌ 삭제 실패: ' + e.message;
+    msg.style.color = 'var(--warn)';
+    msg.style.display = 'block';
+  }
+}
+
+// ============================================
+// 서버에서 학생 명단 병합해서 로그인 화면에 반영
+// ============================================
+let mergedStudents = null; // 서버 병합된 명단 캐시
+
+async function loadAndMergeStudents(){
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=addedStudents');
+    const data = await res.json();
+    const added = data.students || [];
+    // 반별로 병합
+    mergedStudents = {};
+    for(let cls = 1; cls <= 9; cls++){
+      const base = ROSTER[cls] || [];
+      const addedInCls = added.filter(s => Number(s.cls) === cls);
+      // 이름 수정 반영: 같은 번호가 있으면 서버 이름으로 덮어씀
+      const nameOverride = new Map();
+      addedInCls.forEach(s => nameOverride.set(Number(s.number), s.name));
+      const map = new Map();
+      base.forEach(s => {
+        map.set(s.number, {
+          number: s.number,
+          name: nameOverride.has(s.number) ? nameOverride.get(s.number) : s.name
+        });
+      });
+      // 기존에 없는 새 번호도 추가
+      addedInCls.forEach(s => {
+        if(!map.has(Number(s.number))){
+          map.set(Number(s.number), { number: Number(s.number), name: s.name });
+        }
+      });
+      mergedStudents[cls] = Array.from(map.values()).sort((a, b) => a.number - b.number);
+    }
+  } catch(e){
+    console.error('명단 병합 실패, 기본 명단 사용', e);
+    mergedStudents = null;
+  }
+}
+
+function getRosterForClass(cls){
+  if(mergedStudents && mergedStudents[cls]) return mergedStudents[cls];
+  return ROSTER[cls] || [];
+}
+
+// ============================================
 // 라이브 배틀
 // ============================================
 let battleState = {
@@ -3000,4 +3400,5 @@ function showMealError(){
 // 모든 선언 이후에 급식 로드 실행
 loadTodayMeal();
 loadNoticeList();
+loadAndMergeStudents();
 </script>
