@@ -755,6 +755,154 @@
   .tp-podium-item.first{ margin-bottom:20px; padding-top:26px; }
   .tp-podium-item.first .tp-podium-medal{ font-size:48px; }
   .tp-podium-item.first .tp-podium-score{ font-size:26px; }
+
+  /* 포인트 시스템 */
+  .tp-point-earned{
+    background:linear-gradient(135deg, #fff8f0, #fff0f5);
+    border:2px solid var(--accent);
+    border-radius:16px;
+    padding:20px;
+    margin-top:14px;
+    box-shadow:0 4px 0 rgba(255,143,171,0.15);
+  }
+  .tp-point-earned-title{
+    font-family:'Jua',sans-serif;
+    font-size:16px;
+    color:var(--accent);
+    margin:0 0 12px;
+    text-align:center;
+  }
+  .tp-point-earned .earned-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 8px;
+    font-family:'Jua',sans-serif;
+    font-size:14px;
+    color:var(--text);
+    border-bottom:1px dashed var(--line);
+  }
+  .tp-point-earned .earned-row:last-child{ border-bottom:none; }
+  .tp-point-earned .earned-row .amount{
+    color:var(--mint);
+    font-weight:700;
+  }
+  .tp-point-earned-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:2px solid var(--accent-dim);
+    font-family:'Jua',sans-serif;
+    font-size:18px;
+    color:var(--accent);
+  }
+  .tp-point-earned-total strong{ font-size:28px; }
+  .tp-point-earned-current{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  /* 상점 */
+  .tp-shop-title{
+    font-family:'Jua',sans-serif;
+    font-size:14px;
+    color:var(--text);
+    margin:16px 0 8px;
+    padding-top:12px;
+    border-top:2px dashed var(--line);
+  }
+  .tp-shop-item{
+    background:linear-gradient(135deg, #f4f0ff, #fff);
+    border:2px solid #c9b8ff;
+    border-radius:10px;
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .tp-shop-item strong{
+    font-family:'Jua',sans-serif;
+    font-size:14px;
+    color:var(--text);
+  }
+  .tp-shop-price{
+    font-family:'Jua',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color:#7a5fd6;
+  }
+  .tp-shop-buy-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    padding:6px 14px;
+    font-family:'Jua',sans-serif;
+    font-size:12px;
+    cursor:pointer;
+    box-shadow:0 2px 0 rgba(255,143,171,0.25);
+  }
+  .tp-shop-buy-btn:hover{ background:#ff7595; }
+  .tp-shop-buy-btn:disabled{
+    background:var(--muted);
+    cursor:not-allowed;
+    box-shadow:none;
+  }
+
+  /* 관리자 포인트 관리 */
+  .tp-pa-request{
+    background:var(--panel2);
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .tp-pa-request .who{
+    font-family:'Jua',sans-serif;
+  }
+  .tp-pa-request .item{
+    font-size:13px;
+    color:var(--blue);
+    display:block;
+  }
+  .tp-pa-request .price{
+    font-size:12px;
+    color:var(--accent);
+  }
+  .tp-pa-actions{
+    display:flex;
+    gap:6px;
+  }
+  .tp-pa-btn{
+    border:none;
+    border-radius:12px;
+    padding:6px 14px;
+    font-family:'Jua',sans-serif;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .tp-pa-btn.approve{ background:var(--mint); color:#fff; }
+  .tp-pa-btn.reject{ background:var(--warn); color:#fff; }
+  .tp-pa-point-item{
+    background:var(--panel2);
+    border-radius:10px;
+    padding:8px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:5px;
+    font-family:'Jua',sans-serif;
+    font-size:13px;
+  }
+  .tp-pa-point-item .amount{ color:var(--accent); font-weight:700; }
   .tp-notice-title{
     font-family:'Jua', sans-serif;
     font-size:13px;
@@ -1045,7 +1193,7 @@
             </div>
             <div class="tp-dash-stat mint">
               <div class="tp-dash-stat-label">보유 포인트</div>
-              <div class="tp-dash-stat-value">0P</div>
+              <div class="tp-dash-stat-value" id="dash-points">0P</div>
             </div>
             <button class="tp-logout-btn" onclick="logout()">로그아웃</button>
           </div>
@@ -1113,22 +1261,46 @@
             <div class="tp-point-grid">
               <div class="tp-point-item">
                 <div class="tp-point-row"><strong>순위 보상</strong><span class="tp-point-badge">1위 100P · 2위 70P · 3위 50P</span></div>
-                <p class="tp-point-desc">상위 30%는 30P, 나머지 완주자는 10P를 받아요.</p>
+                <p class="tp-point-desc">상위 30% 30P · 완주자 10P (한글/영어 각각)</p>
               </div>
               <div class="tp-point-item">
-                <div class="tp-point-row"><strong>퀴즈 정답</strong><span class="tp-point-badge">정답 1개당 +3P</span></div>
-                <p class="tp-point-desc">돌발 퀴즈를 맞힐수록 포인트가 쌓여요.</p>
+                <div class="tp-point-row"><strong>매일 첫 연습</strong><span class="tp-point-badge">+10P</span></div>
+                <p class="tp-point-desc">하루 한 번, 연습을 완료하면 지급돼요.</p>
               </div>
               <div class="tp-point-item">
                 <div class="tp-point-row"><strong>최고 기록 갱신</strong><span class="tp-point-badge">+10P</span></div>
-                <p class="tp-point-desc">내 이전 최고 점수를 넘으면 보너스가 있어요.</p>
+                <p class="tp-point-desc">10% 이상 성장하면 +10P 추가로 받아요!</p>
               </div>
               <div class="tp-point-item">
-                <div class="tp-point-row"><strong>10% 성장</strong><span class="tp-point-badge">+10P</span></div>
-                <p class="tp-point-desc">이전 최고 기록보다 크게 성장하면 추가 보상!</p>
+                <div class="tp-point-row"><strong>연속 접속</strong><span class="tp-point-badge">3일 +20P · 7일 +50P</span></div>
+                <p class="tp-point-desc">꾸준히 연습하면 보너스가 쌓여요.</p>
               </div>
             </div>
-            <p class="tp-sub" style="text-align:center; margin-top:4px; color:var(--muted); font-size:12px;">✨ 포인트 시스템은 준비 중이에요</p>
+
+            <h4 class="tp-shop-title">🎫 자유시간 상점</h4>
+            <div class="tp-point-grid">
+              <div class="tp-shop-item">
+                <div>
+                  <strong>자유시간 5분 쿠폰</strong>
+                  <p class="tp-point-desc">컴퓨터 자유시간 5분!</p>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+                  <span class="tp-shop-price">3,000P</span>
+                  <button class="tp-shop-buy-btn" onclick="requestPurchase('freetime5', 3000, '자유시간 5분 쿠폰')">구매 요청</button>
+                </div>
+              </div>
+              <div class="tp-shop-item">
+                <div>
+                  <strong>자유시간 10분 쿠폰</strong>
+                  <p class="tp-point-desc">컴퓨터 자유시간 10분!</p>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+                  <span class="tp-shop-price">6,000P</span>
+                  <button class="tp-shop-buy-btn" onclick="requestPurchase('freetime10', 6000, '자유시간 10분 쿠폰')">구매 요청</button>
+                </div>
+              </div>
+            </div>
+            <p class="tp-sub" style="text-align:center; margin-top:6px; color:var(--muted); font-size:11px;">📌 구매 요청 후 선생님이 승인하면 포인트가 차감돼요</p>
           </div>
         </div>
       </div>
@@ -1305,6 +1477,7 @@
         <label>⚙️ 관리 기능</label>
         <button class="tp-btn ghost" onclick="goNoticeAdmin()">📢 공지사항 관리</button>
         <button class="tp-btn ghost" onclick="goStudentAdmin()" style="margin-top:8px;">👥 학생 명단 관리</button>
+        <button class="tp-btn ghost" onclick="goPointAdmin()" style="margin-top:8px;">💎 포인트 관리</button>
       </div>
       <p class="tp-sub" id="manual-error" style="color:var(--warn); display:none;"></p>
     </div>
@@ -1360,6 +1533,28 @@
             <button class="tp-btn ghost" style="margin-top:6px; color:var(--warn); border-color:var(--warn);" onclick="submitDeleteStudent(true)">🗑️ 학생 + 랭킹 기록 함께 삭제</button>
           </div>
           <p class="tp-sub" id="sem-msg" style="display:none;"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- POINT ADMIN -->
+    <div class="tp-screen" id="screen-point-admin">
+      <button class="tp-back-btn" onclick="goHome();">← 처음으로</button>
+      <h2 class="tp-title">포인트 관리 💎</h2>
+      <p class="tp-sub">자유시간 구매 요청과 학생 포인트를 관리해요.</p>
+
+      <div class="tp-field">
+        <label>🎫 자유시간 구매 요청 <span id="pa-pending-count" style="font-size:12px; color:var(--accent);"></span></label>
+        <div id="pa-requests-list">
+          <div class="tp-loading">불러오는 중...</div>
+        </div>
+      </div>
+
+      <div class="tp-field">
+        <label>💎 학생별 포인트 현황</label>
+        <div class="tp-choice-group" id="pa-class-tabs" style="flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+        <div id="pa-points-list">
+          <div class="tp-loading">불러오는 중...</div>
         </div>
       </div>
     </div>
@@ -1524,6 +1719,17 @@
         </div>
         <div class="tp-newbest" id="result-newbest" style="display:none;">🎉 개인 최고 기록 갱신!</div>
       </div>
+
+      <!-- 포인트 획득 결과 -->
+      <div class="tp-point-earned" id="result-points-card" style="display:none;">
+        <h3 class="tp-point-earned-title">💎 이번에 얻은 포인트</h3>
+        <div id="result-points-breakdown"></div>
+        <div class="tp-point-earned-total">
+          <span>+ <strong id="result-points-total">0</strong>P 획득!</span>
+          <span class="tp-point-earned-current">현재 <span id="result-points-current">0</span>P</span>
+        </div>
+      </div>
+
       <div class="tp-btn-row">
         <button class="tp-btn" onclick="startTest()">한 번 더 타닥타닥</button>
         <button class="tp-btn ghost" onclick="goRanking()">랭킹 보기</button>
@@ -1747,6 +1953,9 @@ async function updateDashboard(){
       document.getElementById('dash-class-rank').textContent = '-';
       document.getElementById('dash-total-rank').textContent = '-';
     }
+    // 포인트 표시
+    const points = myRow ? (Number(myRow.points) || 0) : 0;
+    document.getElementById('dash-points').textContent = points.toLocaleString() + 'P';
   } catch(e){
     console.error('대시보드 갱신 실패', e);
     document.getElementById('dash-best').textContent = '기록 불러오는 중...';
@@ -2205,6 +2414,7 @@ function showResult(r){
   document.getElementById('result-time').textContent = r.elapsedSec + '초';
   document.getElementById('result-chars').textContent = r.chars;
   document.getElementById('result-newbest').style.display = 'none';
+  document.getElementById('result-points-card').style.display = 'none';
   showScreen('screen-result');
 }
 
@@ -2224,11 +2434,35 @@ async function saveResult(adjusted, cpm, accuracy){
     if(data && data.isNewBest){
       document.getElementById('result-newbest').style.display = 'block';
     }
+    // 포인트 결과 표시
+    if(data && data.pointsAwarded){
+      renderPointsEarned(data.pointsAwarded, data.totalPoints);
+    }
     // 홈 대시보드 갱신 (백그라운드)
     updateDashboard();
   } catch(e){
     console.error('저장 실패', e);
   }
+}
+
+function renderPointsEarned(awarded, totalPoints){
+  const card = document.getElementById('result-points-card');
+  if(!card) return;
+  if(!awarded || awarded.length === 0){
+    card.style.display = 'none';
+    return;
+  }
+  const breakdown = document.getElementById('result-points-breakdown');
+  breakdown.innerHTML = awarded.map(a =>
+    '<div class="earned-row">' +
+      '<span>' + escapeText(a.label) + '</span>' +
+      '<span class="amount">+' + a.amount + 'P</span>' +
+    '</div>'
+  ).join('');
+  const total = awarded.reduce((sum, a) => sum + (Number(a.amount) || 0), 0);
+  document.getElementById('result-points-total').textContent = total;
+  document.getElementById('result-points-current').textContent = (Number(totalPoints) || 0).toLocaleString();
+  card.style.display = 'block';
 }
 
 const TEACHER_PW = '7979';
@@ -2833,6 +3067,181 @@ function getRosterForClass(cls){
   if(mergedStudents && mergedStudents[cls]) return mergedStudents[cls];
   return ROSTER[cls] || [];
 }
+
+// ============================================
+// 포인트 시스템 - 학생용
+// ============================================
+async function requestPurchase(itemCode, price, itemName){
+  if(!state.student){
+    alert('먼저 선수 입장하고 이용해주세요!');
+    return;
+  }
+  // 포인트 확인
+  let currentPoints = 0;
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=rankings');
+    const data = await res.json();
+    const me = (data.rankings || []).find(r => String(r.cls) === String(state.student.cls) && String(r.number) === String(state.student.number));
+    currentPoints = me ? (Number(me.points) || 0) : 0;
+  } catch(e){}
+
+  if(currentPoints < price){
+    alert('포인트가 부족해요!\n\n필요: ' + price.toLocaleString() + 'P\n보유: ' + currentPoints.toLocaleString() + 'P\n(' + (price - currentPoints).toLocaleString() + 'P 더 모아야 해요)');
+    return;
+  }
+
+  if(!confirm('"' + itemName + '"을(를) 구매 요청할까요?\n\n💎 ' + price.toLocaleString() + 'P 사용 예정\n\n※ 선생님이 승인하면 포인트가 차감되고 자유시간을 사용할 수 있어요.')) return;
+
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'requestPurchase',
+        cls: state.student.cls,
+        number: state.student.number,
+        name: state.student.name,
+        item: itemCode,
+        itemName: itemName,
+        price: price
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      alert('✅ 구매 요청 완료!\n선생님이 확인하실 거예요.');
+    } else {
+      alert('❌ 요청 실패: ' + (data.error || '알 수 없는 오류'));
+    }
+  } catch(e){
+    alert('❌ 요청 실패: ' + e.message);
+  }
+}
+
+// ============================================
+// 포인트 관리 (관리자용)
+// ============================================
+let pointAdminState = {
+  currentClass: 1
+};
+
+function goPointAdmin(){
+  showScreen('screen-point-admin');
+  renderPointAdminTabs();
+  loadPointRequests();
+  loadPointsAdmin();
+}
+
+function renderPointAdminTabs(){
+  const tabs = document.getElementById('pa-class-tabs');
+  let html = '';
+  for(let i = 1; i <= 9; i++){
+    html += '<button class="tp-sa-class-tab' + (i === pointAdminState.currentClass ? ' active' : '') + '" onclick="switchPointClass(' + i + ')">' + i + '반</button>';
+  }
+  tabs.innerHTML = html;
+}
+
+function switchPointClass(cls){
+  pointAdminState.currentClass = cls;
+  renderPointAdminTabs();
+  renderPointsAdminList();
+}
+
+async function loadPointRequests(){
+  const wrap = document.getElementById('pa-requests-list');
+  const countLabel = document.getElementById('pa-pending-count');
+  wrap.innerHTML = '<div class="tp-loading">불러오는 중...</div>';
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=pointRequests');
+    const data = await res.json();
+    const pending = (data.requests || []).filter(r => r.status === 'pending');
+    countLabel.textContent = pending.length > 0 ? '(' + pending.length + '건 대기)' : '(대기 없음)';
+    if(pending.length === 0){
+      wrap.innerHTML = '<div class="tp-empty-mini"><div style="font-size:20px;">✨</div><div>대기 중인 요청이 없어요.</div></div>';
+      return;
+    }
+    wrap.innerHTML = pending.map(r =>
+      '<div class="tp-pa-request">' +
+        '<div class="who">' +
+          r.cls + '반 ' + r.number + '번 ' + escapeText(r.name) +
+          '<span class="item">🎫 ' + escapeText(r.itemName || r.item) + '</span>' +
+          '<span class="price">💎 ' + Number(r.price).toLocaleString() + 'P</span>' +
+        '</div>' +
+        '<div class="tp-pa-actions">' +
+          '<button class="tp-pa-btn approve" onclick="approvePurchase(\'' + r.id + '\')">✅ 승인</button>' +
+          '<button class="tp-pa-btn reject" onclick="rejectPurchase(\'' + r.id + '\')">❌ 거절</button>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  } catch(e){
+    wrap.innerHTML = '<div class="tp-empty-mini"><div>목록을 불러오지 못했어요.</div></div>';
+    console.error('구매 요청 로드 실패', e);
+  }
+}
+
+async function approvePurchase(id){
+  if(!confirm('이 구매 요청을 승인할까요?\n(학생 포인트가 차감되고 자유시간을 지급하세요)')) return;
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'approvePurchase', id: id })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      loadPointRequests();
+      loadPointsAdmin();
+    } else {
+      alert('❌ 승인 실패: ' + (data.error || '오류'));
+    }
+  } catch(e){ alert('❌ 승인 실패: ' + e.message); }
+}
+
+async function rejectPurchase(id){
+  if(!confirm('이 구매 요청을 거절할까요?')) return;
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'rejectPurchase', id: id })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      loadPointRequests();
+    } else {
+      alert('❌ 거절 실패');
+    }
+  } catch(e){ alert('❌ 거절 실패: ' + e.message); }
+}
+
+let pointsAdminData = [];
+async function loadPointsAdmin(){
+  const wrap = document.getElementById('pa-points-list');
+  wrap.innerHTML = '<div class="tp-loading">불러오는 중...</div>';
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=rankings');
+    const data = await res.json();
+    pointsAdminData = data.rankings || [];
+    renderPointsAdminList();
+  } catch(e){
+    wrap.innerHTML = '<div class="tp-empty-mini"><div>포인트를 불러오지 못했어요.</div></div>';
+    console.error('포인트 로드 실패', e);
+  }
+}
+
+function renderPointsAdminList(){
+  const wrap = document.getElementById('pa-points-list');
+  const cls = pointAdminState.currentClass;
+  const inClass = pointsAdminData.filter(r => String(r.cls) === String(cls) && (Number(r.points) || 0) > 0)
+    .sort((a, b) => (Number(b.points) || 0) - (Number(a.points) || 0));
+  if(inClass.length === 0){
+    wrap.innerHTML = '<div class="tp-empty-mini"><div>이 반에는 아직 포인트가 있는 학생이 없어요.</div></div>';
+    return;
+  }
+  wrap.innerHTML = inClass.map(r =>
+    '<div class="tp-pa-point-item">' +
+      '<span>' + r.number + '번 ' + escapeText(r.name) + '</span>' +
+      '<span class="amount">' + Number(r.points || 0).toLocaleString() + 'P</span>' +
+    '</div>'
+  ).join('');
+}
+
 
 // ============================================
 // 라이브 배틀
