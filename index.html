@@ -1752,6 +1752,7 @@
         <div class="tp-tab active" id="lang-ko" onclick="setRankLang('ko')">한글 랭킹</div>
         <div class="tp-tab" id="lang-en" onclick="setRankLang('en')">영어 랭킹</div>
         <div class="tp-tab" id="lang-cumulative" onclick="setRankLang('cumulative')">🌱 누적 타수</div>
+        <div class="tp-tab" id="lang-points" onclick="setRankLang('points')">🏆 포인트</div>
       </div>
       <div id="rank-list-wrap">
         <div class="tp-loading">불러오는 중...</div>
@@ -2008,12 +2009,26 @@ async function restoreLastStudent(){
   }
 }
 
+// 서버에서 불러온 콘텐츠 (fallback으로 기존 배열 사용)
+let contentCache = {
+  ko_words: null,
+  ko_sentences: null,
+  en_words: null,
+  en_sentences: null,
+  loaded: false,
+  error: false
+};
+
 function buildQueue(lang, mode){
   let pool;
   if(mode === 'word'){
-    pool = lang === 'ko' ? KO_WORDS : EN_WORDS;
+    pool = lang === 'ko' ?
+      (contentCache.ko_words || KO_WORDS) :
+      (contentCache.en_words || EN_WORDS);
   } else {
-    pool = lang === 'ko' ? KO_SENTENCES : EN_SENTENCES;
+    pool = lang === 'ko' ?
+      (contentCache.ko_sentences || KO_SENTENCES) :
+      (contentCache.en_sentences || EN_SENTENCES);
   }
   return [...pool].sort(() => Math.random() - 0.5);
 }
@@ -3779,6 +3794,7 @@ function setRankLang(lang){
   document.getElementById('lang-ko').classList.toggle('active', lang === 'ko');
   document.getElementById('lang-en').classList.toggle('active', lang === 'en');
   document.getElementById('lang-cumulative').classList.toggle('active', lang === 'cumulative');
+  document.getElementById('lang-points').classList.toggle('active', lang === 'points');
   loadRanking();
 }
 
@@ -3802,9 +3818,38 @@ async function loadRanking(){
     if(classSet.includes(prevSelected)) select.value = prevSelected;
 
     const isCumulative = state.rankLang === 'cumulative';
+    const isPoints = state.rankLang === 'points';
     let filtered, rowsHtml;
 
-    if(isCumulative){
+    if(isPoints){
+      // 포인트 랭킹: totalEarnedPoints 기준 정렬, 현재 보유 포인트도 표시
+      filtered = valid.filter(r => (r.totalEarnedPoints || r.points || 0) > 0);
+      if(state.rankScope === 'class'){
+        const chosenClass = select.value || classSet[0];
+        filtered = filtered.filter(r => String(r.cls) === String(chosenClass));
+      }
+      filtered.sort((a,b) => ((b.totalEarnedPoints || b.points || 0) - (a.totalEarnedPoints || a.points || 0)));
+
+      if(filtered.length === 0){
+        wrap.innerHTML = '<div class="tp-empty">아직 포인트 기록이 없습니다.<br>연습을 시작하면 여기에 쌓여요.</div>';
+        return;
+      }
+
+      const me = state.student;
+      rowsHtml = filtered.slice(0, 50).map((r, idx) => {
+        const isMe = me && String(r.cls) === String(me.cls) && String(r.number) === String(me.number);
+        const earned = r.totalEarnedPoints || r.points || 0;
+        const current = r.points || 0;
+        return '<div class="tp-rank-row' + (isMe ? ' me' : '') + '">' +
+          '<div class="tp-rank-no">' + (idx + 1) + '</div>' +
+          '<div class="tp-rank-name"><span class="cls">' + r.cls + '반 ' + r.number + '번</span><span class="student-name">' + r.name + '</span></div>' +
+          '<div class="tp-rank-metrics">' +
+            '<span class="tp-rank-acc">💎 ' + current.toLocaleString() + 'P</span>' +
+            '<span class="tp-rank-score">🏆 ' + earned.toLocaleString() + 'P</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    } else if(isCumulative){
       // 누적 타수 랭킹: cumulative 필드 사용, 없으면 0
       filtered = valid.filter(r => (r.cumulative || 0) > 0);
       if(state.rankScope === 'class'){
@@ -3964,9 +4009,52 @@ function showMealError(){
 Promise.all([
   loadTodayMeal(),
   loadNoticeList(),
-  loadAndMergeStudents()
+  loadAndMergeStudents(),
+  loadContentFromServer()
 ]).catch(e => console.warn('초기 로드 일부 실패', e));
 
 // 사운드 시스템 초기화
 initSoundSystem();
+
+// 서버에서 콘텐츠(문장/단어) 불러오기
+async function loadContentFromServer(){
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=content');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if(data && (data.ko_words || data.ko_sentences || data.en_words || data.en_sentences)){
+      // 각 배열은 시트에 값이 있으면 사용, 없거나 비어있으면 하드코딩 값 유지
+      if(Array.isArray(data.ko_words) && data.ko_words.length > 0) contentCache.ko_words = data.ko_words;
+      if(Array.isArray(data.ko_sentences) && data.ko_sentences.length > 0) contentCache.ko_sentences = data.ko_sentences;
+      if(Array.isArray(data.en_words) && data.en_words.length > 0) contentCache.en_words = data.en_words;
+      if(Array.isArray(data.en_sentences) && data.en_sentences.length > 0) contentCache.en_sentences = data.en_sentences;
+      contentCache.loaded = true;
+      contentCache.error = false;
+      console.log('콘텐츠 로드 완료',
+        '한글 단어', (contentCache.ko_words || KO_WORDS).length,
+        '한글 문장', (contentCache.ko_sentences || KO_SENTENCES).length,
+        '영어 단어', (contentCache.en_words || EN_WORDS).length,
+        '영어 문장', (contentCache.en_sentences || EN_SENTENCES).length);
+    } else {
+      throw new Error('empty response');
+    }
+  } catch(e){
+    console.error('콘텐츠 로드 실패', e);
+    contentCache.error = true;
+    // 에러 배너 표시 (홈에서만 눈에 띄게)
+    setTimeout(showContentErrorBanner, 500);
+  }
+}
+
+function showContentErrorBanner(){
+  // 이미 있으면 무시
+  if(document.getElementById('content-error-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'content-error-banner';
+  banner.style.cssText = 'position:fixed; top:12px; left:50%; transform:translateX(-50%); background:#fff; border:2px solid var(--warn); color:var(--warn); padding:10px 20px; border-radius:12px; z-index:9999; font-family:Jua,sans-serif; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,0.1); max-width:90%; text-align:center;';
+  banner.innerHTML = '⚠️ 콘텐츠를 불러올 수 없어요. 잠시 후 다시 시도해주세요. <span style="cursor:pointer; margin-left:8px; color:var(--muted);" onclick="this.parentElement.remove()">✕</span>';
+  document.body.appendChild(banner);
+  // 10초 후 자동 사라짐
+  setTimeout(() => { if(banner.parentElement) banner.remove(); }, 10000);
+}
 </script>
