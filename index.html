@@ -1455,7 +1455,14 @@
                 <h3 class="tp-card-title">💎 상점 포인트 안내</h3>
               </div>
             </div>
-            <div class="tp-point-grid">
+            <h4 class="tp-shop-title">🛍️ 상점</h4>
+            <div class="tp-shop-buttons">
+              <button class="tp-shop-nav-btn shop" onclick="goShop()">🛍️ 상점 열기<span>테두리 · 배경 · 배지 · 아바타</span></button>
+              <button class="tp-shop-nav-btn mystyle" onclick="goMyStyle()">🎨 내 꾸미기<span>산 아이템 골라서 장착</span></button>
+            </div>
+            <p class="tp-sub" style="text-align:center; margin-top:6px; color:var(--muted); font-size:11px;">💡 자유시간 쿠폰은 상점 안에서 살 수 있어요</p>
+
+            <div class="tp-point-grid" style="margin-top:14px;">
               <div class="tp-point-item">
                 <div class="tp-point-row"><strong>순위 보상</strong><span class="tp-point-badge">1위 100P · 2위 70P · 3위 50P</span></div>
                 <p class="tp-point-desc">상위 30% 30P · 완주자 10P (한글/영어 각각)</p>
@@ -1473,13 +1480,6 @@
                 <p class="tp-point-desc">꾸준히 연습하면 보너스가 쌓여요.</p>
               </div>
             </div>
-
-            <h4 class="tp-shop-title">🛍️ 상점</h4>
-            <div class="tp-shop-buttons">
-              <button class="tp-shop-nav-btn shop" onclick="goShop()">🛍️ 상점 열기<span>테두리 · 배경 · 배지 · 아바타</span></button>
-              <button class="tp-shop-nav-btn mystyle" onclick="goMyStyle()">🎨 내 꾸미기<span>산 아이템 골라서 장착</span></button>
-            </div>
-            <p class="tp-sub" style="text-align:center; margin-top:6px; color:var(--muted); font-size:11px;">💡 자유시간 쿠폰은 상점 안에서 살 수 있어요</p>
           </div>
         </div>
       </div>
@@ -2905,7 +2905,7 @@ function finishTest(){
   const adjusted = Math.round(cpm * (accuracy / 100));
 
   showResult({ cpm, accuracy, adjusted, elapsedSec: Math.round(elapsedSec), chars: totalTyped });
-  saveResult(adjusted, cpm, accuracy);
+  saveResult(adjusted, cpm, accuracy, Math.round(elapsedSec), totalTyped);
 }
 
 function showResult(r){
@@ -2918,7 +2918,7 @@ function showResult(r){
   showScreen('screen-result');
 }
 
-async function saveResult(adjusted, cpm, accuracy){
+async function saveResult(adjusted, cpm, accuracy, elapsedSec, chars){
   const { cls, number, name } = state.student;
   try{
     const res = await fetch(MEAL_SERVER_URL, {
@@ -2927,15 +2927,17 @@ async function saveResult(adjusted, cpm, accuracy){
         action: 'saveRecord',
         cls, number, name,
         lang: state.lang,
-        adjusted, cpm, accuracy
+        adjusted, cpm, accuracy,
+        timeLimit: state.timeLimit,
+        elapsedSec, chars
       })
     });
     const data = await res.json();
     if(data && data.isNewBest){
       document.getElementById('result-newbest').style.display = 'block';
     }
-    // 포인트 결과 표시
-    if(data && data.pointsAwarded){
+    // 포인트 결과 표시 (유효하지 않은 연습이면 pointsAwarded가 비어있음)
+    if(data && data.pointsAwarded && data.pointsAwarded.length > 0){
       renderPointsEarned(data.pointsAwarded, data.totalPoints);
     }
     // 캐시 무효화 - 방금 친 새 기록 반영되도록
