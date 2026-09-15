@@ -272,6 +272,14 @@
     font-size:14px;
     margin-left:4px;
   }
+  .rank-avatar{
+    font-size:16px;
+    margin-right:4px;
+  }
+  .rank-badge{
+    font-size:14px;
+    margin-left:4px;
+  }
   .tp-keycaps{
     display:flex;
     flex-wrap:nowrap;
@@ -2111,6 +2119,50 @@ const CATEGORY_ICON = { border: '🖼️', background: '🎨', badge: '✨', ava
 
 function getShopItem(category, id){
   return (SHOP_ITEMS[category] || []).find(i => i.id === id);
+}
+
+// 꾸미기 아이템 렌더링 헬퍼
+function buildEquippedRowStyle(equipped){
+  // 학생의 equipped 정보로 style 문자열 생성 (rank-row inline style용)
+  if(!equipped) return '';
+  const styles = [];
+  // 배경
+  if(equipped.background){
+    const bg = getShopItem('background', equipped.background);
+    if(bg && bg.bg){
+      if(bg.bg.indexOf('gradient') > -1){
+        styles.push('background-image:' + bg.bg);
+      } else {
+        styles.push('background-color:' + bg.bg);
+      }
+    }
+  }
+  // 테두리
+  if(equipped.border){
+    const border = getShopItem('border', equipped.border);
+    if(border){
+      if(border.color === 'rainbow'){
+        styles.push('border:3px solid transparent; border-image:linear-gradient(90deg, #ff8fab, #fbbf24, #57c99b, #a9a0ff) 1');
+      } else if(border.color === 'sparkle'){
+        styles.push('border:3px dashed #fcd34d');
+      } else {
+        styles.push('border:3px solid ' + border.color);
+      }
+    }
+  }
+  return styles.length ? ' style="' + styles.join(';') + '"' : '';
+}
+
+function buildAvatarHtml(equipped){
+  if(!equipped || !equipped.avatar) return '';
+  const av = getShopItem('avatar', equipped.avatar);
+  return av ? '<span class="rank-avatar">' + av.emoji + '</span>' : '';
+}
+
+function buildBadgeHtml(equipped){
+  if(!equipped || !equipped.badge) return '';
+  const bd = getShopItem('badge', equipped.badge);
+  return bd ? '<span class="rank-badge">' + bd.emoji + '</span>' : '';
 }
 
 // ============================================
@@ -4586,9 +4638,12 @@ async function loadRanking(forceRefresh){
         const isMe = me && String(r.cls) === String(me.cls) && String(r.number) === String(me.number);
         const earned = r.totalEarnedPoints || r.points || 0;
         const current = r.points || 0;
-        return '<div class="tp-rank-row' + (isMe ? ' me' : '') + '">' +
+        const rowStyle = buildEquippedRowStyle(r.equipped);
+        const avatar = buildAvatarHtml(r.equipped);
+        const badge = buildBadgeHtml(r.equipped);
+        return '<div class="tp-rank-row' + (isMe ? ' me' : '') + '"' + rowStyle + '>' +
           '<div class="tp-rank-no">' + (idx + 1) + '</div>' +
-          '<div class="tp-rank-name"><span class="cls">' + r.cls + '반 ' + r.number + '번</span><span class="student-name">' + r.name + '</span></div>' +
+          '<div class="tp-rank-name"><span class="cls">' + r.cls + '반 ' + r.number + '번</span>' + avatar + '<span class="student-name">' + r.name + '</span>' + badge + '</div>' +
           '<div class="tp-rank-metrics">' +
             '<span class="tp-rank-acc">💎 ' + current.toLocaleString() + 'P</span>' +
             '<span class="tp-rank-score">🏆 ' + earned.toLocaleString() + 'P</span>' +
@@ -4612,9 +4667,12 @@ async function loadRanking(forceRefresh){
       const me = state.student;
       rowsHtml = filtered.slice(0, 50).map((r, idx) => {
         const isMe = me && String(r.cls) === String(me.cls) && String(r.number) === String(me.number);
-        return '<div class="tp-rank-row' + (isMe ? ' me' : '') + '">' +
+        const rowStyle = buildEquippedRowStyle(r.equipped);
+        const avatar = buildAvatarHtml(r.equipped);
+        const badge = buildBadgeHtml(r.equipped);
+        return '<div class="tp-rank-row' + (isMe ? ' me' : '') + '"' + rowStyle + '>' +
           '<div class="tp-rank-no">' + (idx + 1) + '</div>' +
-          '<div class="tp-rank-name"><span class="cls">' + r.cls + '반 ' + r.number + '번</span><span class="student-name">' + r.name + '</span></div>' +
+          '<div class="tp-rank-name"><span class="cls">' + r.cls + '반 ' + r.number + '번</span>' + avatar + '<span class="student-name">' + r.name + '</span>' + badge + '</div>' +
           '<div class="tp-rank-metrics">' +
             '<span class="tp-rank-acc">🌱 ' + (r.sessions || 0) + '회</span>' +
             '<span class="tp-rank-score">' + (r.cumulative || 0).toLocaleString() + '타</span>' +
@@ -4638,9 +4696,12 @@ async function loadRanking(forceRefresh){
       const me = state.student;
       rowsHtml = filtered.slice(0, 50).map((r, idx) => {
         const isMe = me && String(r.cls) === String(me.cls) && String(r.number) === String(me.number);
-        return '<div class="tp-rank-row' + (isMe ? ' me' : '') + '">' +
+        const rowStyle = buildEquippedRowStyle(r.equipped);
+        const avatar = buildAvatarHtml(r.equipped);
+        const badge = buildBadgeHtml(r.equipped);
+        return '<div class="tp-rank-row' + (isMe ? ' me' : '') + '"' + rowStyle + '>' +
           '<div class="tp-rank-no">' + (idx + 1) + '</div>' +
-          '<div class="tp-rank-name"><span class="cls">' + r.cls + '반 ' + r.number + '번</span><span class="student-name">' + r.name + '</span></div>' +
+          '<div class="tp-rank-name"><span class="cls">' + r.cls + '반 ' + r.number + '번</span>' + avatar + '<span class="student-name">' + r.name + '</span>' + badge + '</div>' +
           '<div class="tp-rank-metrics">' +
             '<span class="tp-rank-acc">🎯 ' + r[field].accuracy + '%</span>' +
             '<span class="tp-rank-score">' + r[field].adjusted + '타</span>' +
