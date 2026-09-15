@@ -2044,7 +2044,18 @@ const SHOP_ITEMS = {
     // 프리미엄 500P
     { id: 'b_gold', name: '👑 골드', price: 500, tier: 'legendary', color: '#fcd34d' },
     { id: 'b_diamond', name: '💎 다이아', price: 500, tier: 'legendary', color: '#67e8f9' },
-    { id: 'b_sparkle', name: '✨ 반짝반짝', price: 500, tier: 'legendary', color: 'sparkle' }
+    { id: 'b_sparkle', name: '✨ 반짝반짝', price: 500, tier: 'legendary', color: 'sparkle' },
+    // ▼ 신규 추가
+    // 기본 100P
+    { id: 'b_mint', name: '🩵 민트', price: 100, tier: 'basic', color: '#5eead4' },
+    { id: 'b_coral', name: '🧡 코랄', price: 100, tier: 'basic', color: '#fb923c' },
+    // 고급 300P
+    { id: 'b_heartflow', name: '💕 하트 흐름', price: 300, tier: 'premium', color: 'heart' },
+    { id: 'b_starlight', name: '🌠 별빛', price: 300, tier: 'premium', color: '#818cf8' },
+    { id: 'b_mango', name: '🍑 코랄핑크', price: 300, tier: 'premium', color: '#fb7185' },
+    // 프리미엄 500P
+    { id: 'b_glitter', name: '✨ 글리터', price: 500, tier: 'legendary', color: 'glitter' },
+    { id: 'b_candyflow', name: '🌈 파스텔무지개 흐름', price: 500, tier: 'legendary', color: 'candyflow' }
   ],
   background: [
     // 기본 100P
@@ -2064,7 +2075,18 @@ const SHOP_ITEMS = {
     // 프리미엄 500P
     { id: 'bg_holo', name: '홀로그램', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #a9a0ff, #ff8fab, #57c99b)' },
     { id: 'bg_aurora', name: '오로라', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #67e8f9, #a78bfa, #86efac)' },
-    { id: 'bg_gold', name: '골드', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #fcd34d, #fef3c7)' }
+    { id: 'bg_gold', name: '골드', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #fcd34d, #fef3c7)' },
+    // ▼ 신규 추가
+    // 기본 100P
+    { id: 'bg_lmint', name: '연민트', price: 100, tier: 'basic', bg: '#f0fdfa' },
+    { id: 'bg_lcoral', name: '연코랄', price: 100, tier: 'basic', bg: '#fff5f2' },
+    // 고급 300P
+    { id: 'bg_cloudsky', name: '하늘구름', price: 300, tier: 'premium', bg: 'linear-gradient(135deg, #e0f2fe, #ffffff, #f0f9ff)' },
+    { id: 'bg_pastelrainbow', name: '파스텔무지개', price: 300, tier: 'premium', bg: 'linear-gradient(90deg, #ffd6e8, #fff4c6, #d6f5e3, #d6e8ff, #e8d6ff)' },
+    { id: 'bg_sakurafall', name: '벚꽃날림', price: 300, tier: 'premium', bg: 'linear-gradient(160deg, #ffe4ef, #ffc2dd, #fff0f5)' },
+    // 프리미엄 500P
+    { id: 'bg_starnight', name: '밤하늘별', price: 500, tier: 'legendary', bg: 'linear-gradient(160deg, #1e1b4b, #4c1d95, #0f172a)' },
+    { id: 'bg_glittershine', name: '반짝이 샤인', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #fff8dc, #ffd700, #ffffff, #ffd700)' }
   ],
   badge: [
     // 기본 100P
@@ -2091,24 +2113,49 @@ const SHOP_ITEMS = {
     { id: 'g_galaxy', name: '🌌', price: 500, tier: 'legendary', emoji: '🌌' },
     { id: 'g_champ', name: '🏆✨', price: 500, tier: 'legendary', emoji: '🏆✨' },
     { id: 'g_king', name: '👑💎', price: 500, tier: 'legendary', emoji: '👑💎' },
-    { id: 'g_space', name: '🌌🌠', price: 500, tier: 'legendary', emoji: '🌌🌠' }
+    { id: 'g_space', name: '🌌🌠', price: 500, tier: 'legendary', emoji: '🌌🌠' },
+    // ▼ 신규 추가
+    // 기본 100P
+    { id: 'g_bear', name: '🧸 곰인형', price: 100, tier: 'basic', emoji: '🧸' },
+    { id: 'g_strawberry', name: '🍓 딸기', price: 100, tier: 'basic', emoji: '🍓' },
+    { id: 'g_peach', name: '🍑 복숭아', price: 100, tier: 'basic', emoji: '🍑' },
+    // 고급 300P
+    { id: 'g_chick', name: '🐣 병아리', price: 300, tier: 'premium', emoji: '🐣' },
+    { id: 'g_cake', name: '🎂 케이크', price: 300, tier: 'premium', emoji: '🎂' },
+    { id: 'g_cupcake', name: '🧁 컵케이크', price: 300, tier: 'premium', emoji: '🧁' },
+    // 프리미엄 500P
+    { id: 'g_lollipop', name: '🍭 롤리팝', price: 500, tier: 'legendary', emoji: '🍭' },
+    { id: 'g_sakurasparkle', name: '🌸✨ 벚꽃반짝', price: 500, tier: 'legendary', emoji: '🌸✨' },
+    { id: 'g_ribbonlove', name: '🎀💕 리본러브', price: 500, tier: 'legendary', emoji: '🎀💕' }
   ],
   avatar: [
     // 기본 200P
     { id: 'a_rabbit', name: '토끼', price: 200, tier: 'basic', emoji: '🐰' },
     { id: 'a_wolf', name: '늑대', price: 200, tier: 'basic', emoji: '🐺' },
     { id: 'a_lion', name: '사자', price: 200, tier: 'basic', emoji: '🦁' },
-    { id: 'a_alien', name: '외계인', price: 200, tier: 'basic', emoji: '👽' },
-    { id: 'a_robot', name: '로봇', price: 200, tier: 'basic', emoji: '🤖' },
     { id: 'a_polar', name: '북극곰', price: 200, tier: 'basic', emoji: '🐻‍❄️' },
     { id: 'a_fox', name: '여우', price: 200, tier: 'basic', emoji: '🦊' },
     // 고급 400P
     { id: 'a_gold_dragon', name: '골드 드래곤', price: 400, tier: 'premium', emoji: '🐲' },
     { id: 'a_blue_dragon', name: '블루 드래곤', price: 400, tier: 'premium', emoji: '🐉' },
     { id: 'a_ninja', name: '닌자', price: 400, tier: 'premium', emoji: '🥷' },
+    { id: 'a_alien', name: '외계인', price: 400, tier: 'premium', emoji: '👽' },
+    { id: 'a_robot', name: '로봇', price: 400, tier: 'premium', emoji: '🤖' },
     // 프리미엄 500P
     { id: 'a_hip', name: '힙', price: 500, tier: 'legendary', emoji: '😎' },
-    { id: 'a_king', name: '킹', price: 500, tier: 'legendary', emoji: '👑' }
+    { id: 'a_king', name: '킹', price: 500, tier: 'legendary', emoji: '👑' },
+    // ▼ 신규 추가
+    // 기본 200P
+    { id: 'a_hamster', name: '햄스터', price: 200, tier: 'basic', emoji: '🐹' },
+    { id: 'a_penguin', name: '펭귄', price: 200, tier: 'basic', emoji: '🐧' },
+    { id: 'a_panda', name: '판다', price: 200, tier: 'basic', emoji: '🐼' },
+    { id: 'a_frog', name: '개구리', price: 200, tier: 'basic', emoji: '🐸' },
+    // 고급 400P
+    { id: 'a_dino', name: '공룡', price: 400, tier: 'premium', emoji: '🦖' },
+    { id: 'a_hedgehog', name: '고슴도치', price: 400, tier: 'premium', emoji: '🦔' },
+    // 프리미엄 500P
+    { id: 'a_angel', name: '천사', price: 500, tier: 'legendary', emoji: '😇' },
+    { id: 'a_fairy', name: '요정', price: 500, tier: 'legendary', emoji: '🧚' }
   ]
 };
 
@@ -2145,6 +2192,12 @@ function buildEquippedRowStyle(equipped){
         styles.push('border:3px solid transparent; border-image:linear-gradient(90deg, #ff8fab, #fbbf24, #57c99b, #a9a0ff) 1');
       } else if(border.color === 'sparkle'){
         styles.push('border:3px dashed #fcd34d');
+      } else if(border.color === 'heart'){
+        styles.push('border:3px solid transparent; border-image:linear-gradient(90deg, #ff6b9d, #ff8fab, #ffc2d1, #ff6b9d) 1');
+      } else if(border.color === 'glitter'){
+        styles.push('border:3px dotted #fff8dc');
+      } else if(border.color === 'candyflow'){
+        styles.push('border:3px solid transparent; border-image:linear-gradient(90deg, #ffb3d9, #ffd6a5, #caffbf, #a0c4ff, #bdb2ff) 1');
       } else {
         styles.push('border:3px solid ' + border.color);
       }
@@ -3674,6 +3727,9 @@ function renderItemPreview(category, item){
     let borderStyle;
     if(item.color === 'rainbow') borderStyle = 'linear-gradient(90deg, #ff8fab, #fbbf24, #57c99b, #a9a0ff)';
     else if(item.color === 'sparkle') borderStyle = 'linear-gradient(135deg, #fcd34d, #fff, #a9a0ff, #fff)';
+    else if(item.color === 'heart') borderStyle = 'linear-gradient(90deg, #ff6b9d, #ff8fab, #ffc2d1, #ff6b9d)';
+    else if(item.color === 'glitter') borderStyle = 'linear-gradient(135deg, #fff8dc, #ffd700, #ffffff, #ffd700)';
+    else if(item.color === 'candyflow') borderStyle = 'linear-gradient(90deg, #ffb3d9, #ffd6a5, #caffbf, #a0c4ff, #bdb2ff)';
     else borderStyle = item.color;
     return '<div style="width:80%; height:40px; border-radius:20px; border:3px solid transparent; background:' + (borderStyle.includes('gradient') ? borderStyle : borderStyle) + '; box-shadow:0 0 0 3px ' + (borderStyle.includes('gradient') ? '#fff' : borderStyle) + ' inset;"></div>';
   }
@@ -3890,6 +3946,19 @@ function updateMyStylePreview(){
         row.style.borderStyle = 'dashed';
         row.style.borderColor = '#fcd34d';
         row.style.borderImage = '';
+      } else if(border.color === 'heart'){
+        row.style.borderWidth = '3px';
+        row.style.borderStyle = 'solid';
+        row.style.borderImage = 'linear-gradient(90deg, #ff6b9d, #ff8fab, #ffc2d1, #ff6b9d) 1';
+      } else if(border.color === 'glitter'){
+        row.style.borderWidth = '3px';
+        row.style.borderStyle = 'dotted';
+        row.style.borderColor = '#fff8dc';
+        row.style.borderImage = '';
+      } else if(border.color === 'candyflow'){
+        row.style.borderWidth = '3px';
+        row.style.borderStyle = 'solid';
+        row.style.borderImage = 'linear-gradient(90deg, #ffb3d9, #ffd6a5, #caffbf, #a0c4ff, #bdb2ff) 1';
       } else {
         row.style.borderWidth = '3px';
         row.style.borderStyle = 'solid';
