@@ -96,6 +96,182 @@
   }
   .tp-sound-toggle:hover{ transform:scale(1.08); }
   .tp-sound-toggle.muted{ opacity:0.5; background:var(--panel2); }
+
+  .tp-refresh-btn{
+    background:#fff;
+    border:2px solid var(--accent);
+    color:var(--accent);
+    border-radius:20px;
+    padding:6px 14px;
+    font-family:'Jua', sans-serif;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:4px;
+    white-space:nowrap;
+    transition:transform .12s, background .12s;
+  }
+  .tp-refresh-btn:hover{ background:var(--panel2); transform:scale(1.03); }
+  .tp-refresh-btn.spinning #refresh-icon{ animation:spin 0.8s linear infinite; }
+  @keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+  /* 상점 홈 버튼 */
+  .tp-shop-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:8px;
+  }
+  .tp-shop-nav-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:2px;
+    padding:14px 16px;
+    border-radius:14px;
+    border:2px solid;
+    background:#fff;
+    cursor:pointer;
+    font-family:'Jua', sans-serif;
+    font-size:15px;
+    color:var(--text);
+    transition:transform .12s;
+  }
+  .tp-shop-nav-btn:hover{ transform:translateY(-2px); }
+  .tp-shop-nav-btn.shop{ border-color:var(--accent); background:linear-gradient(135deg, #fff, #fef2f6); }
+  .tp-shop-nav-btn.mystyle{ border-color:#a9a0ff; background:linear-gradient(135deg, #fff, #f5f3ff); }
+  .tp-shop-nav-btn span{ font-size:11px; color:var(--muted); font-weight:normal; }
+
+  /* 상점 화면 */
+  .tp-shop-header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .tp-shop-balance{
+    background:linear-gradient(135deg, #fef3c7, #fde68a);
+    border:2px solid #fbbf24;
+    padding:6px 12px;
+    border-radius:16px;
+    font-family:'Jua', sans-serif;
+    font-size:14px;
+    color:#92400e;
+    font-weight:700;
+  }
+  .tp-shop-mystyle-link{
+    background:#fff;
+    border:2px solid #a9a0ff;
+    color:#7a5fd6;
+    border-radius:16px;
+    padding:6px 12px;
+    font-family:'Jua', sans-serif;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .tp-shop-mystyle-link:hover{ background:#f5f3ff; }
+
+  .tp-shop-tier-header{
+    font-family:'Jua', sans-serif;
+    font-size:13px;
+    margin:14px 0 8px;
+    padding:4px 12px;
+    border-radius:12px;
+    display:inline-block;
+    color:#fff;
+  }
+  .tp-shop-tier-header.basic{ background:#57c99b; }
+  .tp-shop-tier-header.premium{ background:#a9a0ff; }
+  .tp-shop-tier-header.legendary{ background:#fbbf24; color:#78350f; }
+
+  .tp-shop-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+    gap:10px;
+  }
+  .tp-shop-card{
+    background:var(--panel);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:12px 10px;
+    text-align:center;
+    transition:transform .12s;
+    position:relative;
+  }
+  .tp-shop-card:hover{ transform:translateY(-2px); box-shadow:0 4px 12px rgba(255,143,171,0.15); }
+  .tp-shop-card.owned{ border-color:var(--mint); background:#f0fdf4; }
+  .tp-shop-card.owned::after{
+    content:'✓ 보유';
+    position:absolute;
+    top:6px;
+    right:6px;
+    background:var(--mint);
+    color:#fff;
+    font-size:10px;
+    padding:2px 6px;
+    border-radius:8px;
+    font-family:'Jua', sans-serif;
+  }
+  .tp-shop-card-preview{
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:8px;
+    border-radius:10px;
+    background:var(--panel2);
+    overflow:hidden;
+  }
+  .tp-shop-card-name{
+    font-family:'Jua', sans-serif;
+    font-size:13px;
+    color:var(--text);
+    margin-bottom:4px;
+    min-height:16px;
+  }
+  .tp-shop-card-price{
+    font-family:'Jua', sans-serif;
+    font-size:13px;
+    color:var(--accent);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .tp-shop-card-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:6px 12px;
+    font-family:'Jua', sans-serif;
+    font-size:11px;
+    cursor:pointer;
+    width:100%;
+  }
+  .tp-shop-card-btn:hover{ background:#ff7595; }
+  .tp-shop-card-btn:disabled{ background:var(--muted); cursor:not-allowed; }
+  .tp-shop-card-btn.owned{ background:var(--mint); cursor:default; }
+
+  /* 미리보기 스타일들 */
+  .preview-emoji-lg{ font-size:36px; }
+  .preview-badge-lg{ font-size:28px; }
+  .preview-swatch{
+    width:80%;
+    height:40px;
+    border-radius:8px;
+  }
+
+  /* 미리보기 */
+  .tp-mystyle-preview{
+    background:var(--panel2);
+    border-radius:14px;
+    padding:14px;
+    margin-top:6px;
+  }
+  .badge-emoji{
+    font-size:14px;
+    margin-left:4px;
+  }
   .tp-keycaps{
     display:flex;
     flex-wrap:nowrap;
@@ -1264,8 +1440,8 @@
                 <p class="tp-point-desc">상위 30% 30P · 완주자 10P (한글/영어 각각)</p>
               </div>
               <div class="tp-point-item">
-                <div class="tp-point-row"><strong>매일 첫 연습</strong><span class="tp-point-badge">+10P</span></div>
-                <p class="tp-point-desc">하루 한 번, 연습을 완료하면 지급돼요.</p>
+                <div class="tp-point-row"><strong>매일 첫 연습</strong><span class="tp-point-badge">시간별 지급</span></div>
+                <p class="tp-point-desc">30초 5P · 60초 10P · 90초 15P · 120초 20P</p>
               </div>
               <div class="tp-point-item">
                 <div class="tp-point-row"><strong>최고 기록 갱신</strong><span class="tp-point-badge">+10P</span></div>
@@ -1277,36 +1453,88 @@
               </div>
             </div>
 
-            <h4 class="tp-shop-title">🎫 자유시간 상점</h4>
-            <div class="tp-point-grid">
-              <div class="tp-shop-item">
-                <div>
-                  <strong>자유시간 5분 쿠폰</strong>
-                  <p class="tp-point-desc">컴퓨터 자유시간 5분!</p>
-                </div>
-                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
-                  <span class="tp-shop-price">3,000P</span>
-                  <button class="tp-shop-buy-btn" onclick="requestPurchase('freetime5', 3000, '자유시간 5분 쿠폰')">구매 요청</button>
-                </div>
-              </div>
-              <div class="tp-shop-item">
-                <div>
-                  <strong>자유시간 10분 쿠폰</strong>
-                  <p class="tp-point-desc">컴퓨터 자유시간 10분!</p>
-                </div>
-                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
-                  <span class="tp-shop-price">6,000P</span>
-                  <button class="tp-shop-buy-btn" onclick="requestPurchase('freetime10', 6000, '자유시간 10분 쿠폰')">구매 요청</button>
-                </div>
-              </div>
+            <h4 class="tp-shop-title">🛍️ 상점</h4>
+            <div class="tp-shop-buttons">
+              <button class="tp-shop-nav-btn shop" onclick="goShop()">🛍️ 상점 열기<span>테두리 · 배경 · 배지 · 아바타</span></button>
+              <button class="tp-shop-nav-btn mystyle" onclick="goMyStyle()">🎨 내 꾸미기<span>산 아이템 골라서 장착</span></button>
             </div>
-            <p class="tp-sub" style="text-align:center; margin-top:6px; color:var(--muted); font-size:11px;">📌 구매 요청 후 선생님이 승인하면 포인트가 차감돼요</p>
+            <p class="tp-sub" style="text-align:center; margin-top:6px; color:var(--muted); font-size:11px;">💡 자유시간 쿠폰은 상점 안에서 살 수 있어요</p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 공지사항 팝업 모달 -->
+    <!-- SHOP -->
+    <div class="tp-screen" id="screen-shop">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px;">
+        <h2 class="tp-title" style="margin:0;">🛍️ 상점</h2>
+        <div class="tp-shop-header-actions">
+          <span class="tp-shop-balance" id="shop-balance">💎 0P</span>
+          <button class="tp-shop-mystyle-link" onclick="goMyStyle()">🎨 내 꾸미기</button>
+        </div>
+      </div>
+      <p class="tp-sub">포인트로 꾸미기 아이템을 사거나 자유시간을 구매할 수 있어요!</p>
+
+      <div class="tp-tabs" style="margin-top:8px;">
+        <div class="tp-tab active" id="shop-tab-border" onclick="setShopCategory('border')">🖼️ 테두리</div>
+        <div class="tp-tab" id="shop-tab-background" onclick="setShopCategory('background')">🎨 배경</div>
+        <div class="tp-tab" id="shop-tab-badge" onclick="setShopCategory('badge')">✨ 배지</div>
+        <div class="tp-tab" id="shop-tab-avatar" onclick="setShopCategory('avatar')">🎭 아바타</div>
+        <div class="tp-tab" id="shop-tab-freetime" onclick="setShopCategory('freetime')">🎫 자유시간</div>
+      </div>
+
+      <div id="shop-items-wrap">
+        <div class="tp-loading">불러오는 중...</div>
+      </div>
+
+      <div class="tp-nav">
+        <button class="tp-btn ghost" onclick="goHome()">🏠 홈으로</button>
+      </div>
+    </div>
+
+    <!-- MY STYLE (내 꾸미기) -->
+    <div class="tp-screen" id="screen-mystyle">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px;">
+        <h2 class="tp-title" style="margin:0;">🎨 내 꾸미기</h2>
+        <button class="tp-shop-mystyle-link" onclick="goShop()">🛍️ 상점으로</button>
+      </div>
+      <p class="tp-sub">산 아이템 중에서 지금 사용할 것을 골라보세요!</p>
+
+      <!-- 미리보기 -->
+      <div class="tp-field">
+        <label>미리보기</label>
+        <div class="tp-mystyle-preview" id="mystyle-preview">
+          <div class="tp-rank-row" id="mystyle-preview-row">
+            <div class="tp-rank-no">1</div>
+            <div class="tp-rank-name">
+              <span class="cls">1반 1번</span>
+              <span class="student-name" id="mystyle-preview-name">이름</span>
+              <span class="badge-emoji" id="mystyle-preview-badge"></span>
+            </div>
+            <div class="tp-rank-metrics">
+              <span class="tp-rank-score">300타</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tp-tabs" style="margin-top:8px;">
+        <div class="tp-tab active" id="mystyle-tab-border" onclick="setMyStyleCategory('border')">🖼️ 테두리</div>
+        <div class="tp-tab" id="mystyle-tab-background" onclick="setMyStyleCategory('background')">🎨 배경</div>
+        <div class="tp-tab" id="mystyle-tab-badge" onclick="setMyStyleCategory('badge')">✨ 배지</div>
+        <div class="tp-tab" id="mystyle-tab-avatar" onclick="setMyStyleCategory('avatar')">🎭 아바타</div>
+      </div>
+
+      <div id="mystyle-items-wrap">
+        <div class="tp-loading">불러오는 중...</div>
+      </div>
+
+      <div class="tp-nav">
+        <button class="tp-btn ghost" onclick="goHome()">🏠 홈으로</button>
+      </div>
+    </div>
+
     <div id="notice-modal" onclick="closeNoticeModal(event)">
       <div class="tp-modal-box" onclick="event.stopPropagation()">
         <div class="tp-modal-head">
@@ -1739,7 +1967,12 @@
 
     <!-- RANKING -->
     <div class="tp-screen" id="screen-rank">
-      <h2 class="tp-title">✨ 랭킹 구경하기</h2>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px;">
+        <h2 class="tp-title" style="margin:0;">✨ 랭킹 구경하기</h2>
+        <button class="tp-refresh-btn" onclick="refreshRanking()" title="최신 순위로 새로고침">
+          <span id="refresh-icon">🔄</span> <span style="font-size:12px;">새로고침</span>
+        </button>
+      </div>
       <div class="tp-tabs">
         <div class="tp-tab active" id="scope-all" onclick="setScope('all')">전체 랭킹</div>
         <div class="tp-tab" id="scope-class" onclick="setScope('class')">반별 랭킹</div>
@@ -1780,6 +2013,141 @@ const ROSTER = {"1":[{"number":1,"name":"강다경"},{"number":2,"name":"김민�
 
 const TIME_LIMIT = 60;
 const MEAL_SERVER_URL = 'https://script.google.com/macros/s/AKfycbyvRP631OTlEvs2hyblqfxEsOQuiLSFJlodc4pRyygWY5u4MQFPZmdMRmi3T3Zx2YWtmw/exec';
+
+// ============================================
+// 꾸미기 아이템 카탈로그
+// ============================================
+const SHOP_ITEMS = {
+  border: [
+    // 기본 100P
+    { id: 'b_blue', name: '💙 파랑', price: 100, tier: 'basic', color: '#a9a0ff' },
+    { id: 'b_purple', name: '💜 보라', price: 100, tier: 'basic', color: '#c084fc' },
+    { id: 'b_green', name: '💚 초록', price: 100, tier: 'basic', color: '#57c99b' },
+    { id: 'b_yellow', name: '💛 노랑', price: 100, tier: 'basic', color: '#fbbf24' },
+    { id: 'b_sky', name: '🩵 하늘', price: 100, tier: 'basic', color: '#7dd3fc' },
+    { id: 'b_lightpink', name: '🩷 라이트핑크', price: 100, tier: 'basic', color: '#fbcfe8' },
+    // 고급 300P
+    { id: 'b_ribbon', name: '🎀 리본핑크', price: 300, tier: 'premium', color: '#ff8fab' },
+    { id: 'b_cherry', name: '🌸 벚꽃', price: 300, tier: 'premium', color: '#ff9bc0' },
+    { id: 'b_rainbow', name: '🌈 무지개', price: 300, tier: 'premium', color: 'rainbow' },
+    { id: 'b_fire', name: '🔥 불꽃', price: 300, tier: 'premium', color: '#f97316' },
+    { id: 'b_thunder', name: '⚡ 번개', price: 300, tier: 'premium', color: '#fbbf24' },
+    { id: 'b_water', name: '🌊 물결', price: 300, tier: 'premium', color: '#3b82f6' },
+    // 프리미엄 500P
+    { id: 'b_gold', name: '👑 골드', price: 500, tier: 'legendary', color: '#fcd34d' },
+    { id: 'b_diamond', name: '💎 다이아', price: 500, tier: 'legendary', color: '#67e8f9' },
+    { id: 'b_sparkle', name: '✨ 반짝반짝', price: 500, tier: 'legendary', color: 'sparkle' }
+  ],
+  background: [
+    // 기본 100P
+    { id: 'bg_lpink', name: '연분홍', price: 100, tier: 'basic', bg: '#fef2f6' },
+    { id: 'bg_lblue', name: '연파랑', price: 100, tier: 'basic', bg: '#eff6ff' },
+    { id: 'bg_lpurple', name: '연보라', price: 100, tier: 'basic', bg: '#f5f3ff' },
+    { id: 'bg_lgreen', name: '연초록', price: 100, tier: 'basic', bg: '#f0fdf4' },
+    { id: 'bg_lyellow', name: '연노랑', price: 100, tier: 'basic', bg: '#fefce8' },
+    { id: 'bg_lsky', name: '연하늘', price: 100, tier: 'basic', bg: '#f0f9ff' },
+    { id: 'bg_lpeach', name: '연피치', price: 100, tier: 'basic', bg: '#fff7ed' },
+    // 고급 300P
+    { id: 'bg_pinkgrad', name: '핑크 그라데', price: 300, tier: 'premium', bg: 'linear-gradient(135deg, #fbcfe8, #fef2f6)' },
+    { id: 'bg_skygrad', name: '하늘 그라데', price: 300, tier: 'premium', bg: 'linear-gradient(135deg, #7dd3fc, #f0f9ff)' },
+    { id: 'bg_sunset', name: '노을 그라데', price: 300, tier: 'premium', bg: 'linear-gradient(135deg, #fbbf24, #f97316)' },
+    { id: 'bg_meadow', name: '초원 그라데', price: 300, tier: 'premium', bg: 'linear-gradient(135deg, #86efac, #fef9c3)' },
+    { id: 'bg_galaxy', name: '우주 그라데', price: 300, tier: 'premium', bg: 'linear-gradient(135deg, #a78bfa, #67e8f9)' },
+    // 프리미엄 500P
+    { id: 'bg_holo', name: '홀로그램', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #a9a0ff, #ff8fab, #57c99b)' },
+    { id: 'bg_aurora', name: '오로라', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #67e8f9, #a78bfa, #86efac)' },
+    { id: 'bg_gold', name: '골드', price: 500, tier: 'legendary', bg: 'linear-gradient(135deg, #fcd34d, #fef3c7)' }
+  ],
+  badge: [
+    // 기본 100P
+    { id: 'g_cherry', name: '🌸', price: 100, tier: 'basic', emoji: '🌸' },
+    { id: 'g_star', name: '⭐', price: 100, tier: 'basic', emoji: '⭐' },
+    { id: 'g_glow', name: '🌟', price: 100, tier: 'basic', emoji: '🌟' },
+    { id: 'g_sparkle', name: '✨', price: 100, tier: 'basic', emoji: '✨' },
+    { id: 'g_ribbon', name: '🎀', price: 100, tier: 'basic', emoji: '🎀' },
+    { id: 'g_clover', name: '🍀', price: 100, tier: 'basic', emoji: '🍀' },
+    { id: 'g_rainbow', name: '🌈', price: 100, tier: 'basic', emoji: '🌈' },
+    { id: 'g_wand', name: '💫', price: 100, tier: 'basic', emoji: '💫' },
+    // 고급 300P
+    { id: 'g_unicorn', name: '🦄', price: 300, tier: 'premium', emoji: '🦄' },
+    { id: 'g_butterfly', name: '🦋', price: 300, tier: 'premium', emoji: '🦋' },
+    { id: 'g_dragon', name: '🐉', price: 300, tier: 'premium', emoji: '🐉' },
+    { id: 'g_flower', name: '🌺', price: 300, tier: 'premium', emoji: '🌺' },
+    { id: 'g_fire', name: '🔥', price: 300, tier: 'premium', emoji: '🔥' },
+    { id: 'g_thunder', name: '⚡', price: 300, tier: 'premium', emoji: '⚡' },
+    // 프리미엄 500P
+    { id: 'g_crown', name: '👑', price: 500, tier: 'legendary', emoji: '👑' },
+    { id: 'g_target', name: '🎯', price: 500, tier: 'legendary', emoji: '🎯' },
+    { id: 'g_diamond', name: '💎', price: 500, tier: 'legendary', emoji: '💎' },
+    { id: 'g_trophy', name: '🏆', price: 500, tier: 'legendary', emoji: '🏆' },
+    { id: 'g_galaxy', name: '🌌', price: 500, tier: 'legendary', emoji: '🌌' },
+    { id: 'g_champ', name: '🏆✨', price: 500, tier: 'legendary', emoji: '🏆✨' },
+    { id: 'g_king', name: '👑💎', price: 500, tier: 'legendary', emoji: '👑💎' },
+    { id: 'g_space', name: '🌌🌠', price: 500, tier: 'legendary', emoji: '🌌🌠' }
+  ],
+  avatar: [
+    // 기본 200P
+    { id: 'a_rabbit', name: '토끼', price: 200, tier: 'basic', emoji: '🐰' },
+    { id: 'a_wolf', name: '늑대', price: 200, tier: 'basic', emoji: '🐺' },
+    { id: 'a_lion', name: '사자', price: 200, tier: 'basic', emoji: '🦁' },
+    { id: 'a_alien', name: '외계인', price: 200, tier: 'basic', emoji: '👽' },
+    { id: 'a_robot', name: '로봇', price: 200, tier: 'basic', emoji: '🤖' },
+    { id: 'a_polar', name: '북극곰', price: 200, tier: 'basic', emoji: '🐻‍❄️' },
+    { id: 'a_fox', name: '여우', price: 200, tier: 'basic', emoji: '🦊' },
+    // 고급 400P
+    { id: 'a_gold_dragon', name: '골드 드래곤', price: 400, tier: 'premium', emoji: '🐲' },
+    { id: 'a_blue_dragon', name: '블루 드래곤', price: 400, tier: 'premium', emoji: '🐉' },
+    { id: 'a_ninja', name: '닌자', price: 400, tier: 'premium', emoji: '🥷' },
+    // 프리미엄 500P
+    { id: 'a_hip', name: '힙', price: 500, tier: 'legendary', emoji: '😎' },
+    { id: 'a_king', name: '킹', price: 500, tier: 'legendary', emoji: '👑' }
+  ]
+};
+
+const TIER_LABEL = { basic: '기본', premium: '고급', legendary: '프리미엄' };
+const TIER_COLOR = { basic: '#57c99b', premium: '#a9a0ff', legendary: '#fcd34d' };
+const CATEGORY_LABEL = { border: '테두리', background: '배경', badge: '배지', avatar: '아바타' };
+const CATEGORY_ICON = { border: '🖼️', background: '🎨', badge: '✨', avatar: '🎭' };
+
+function getShopItem(category, id){
+  return (SHOP_ITEMS[category] || []).find(i => i.id === id);
+}
+
+// ============================================
+// 랭킹 캐시 시스템 (1분)
+// ============================================
+const rankingCache = {
+  data: null,
+  at: 0,
+  TTL: 60000  // 1분
+};
+
+async function fetchRankings(forceRefresh){
+  const now = Date.now();
+  if(!forceRefresh && rankingCache.data && (now - rankingCache.at) < rankingCache.TTL){
+    return rankingCache.data;
+  }
+  const res = await fetch(MEAL_SERVER_URL + '?action=rankings');
+  const data = await res.json();
+  rankingCache.data = data;
+  rankingCache.at = now;
+  return data;
+}
+
+function invalidateRankingCache(){
+  rankingCache.data = null;
+  rankingCache.at = 0;
+}
+
+async function refreshRanking(){
+  const btn = document.querySelector('.tp-refresh-btn');
+  if(btn) btn.classList.add('spinning');
+  invalidateRankingCache();
+  await loadRanking(true);
+  // 대시보드 있으면 함께 갱신
+  if(state.student) updateDashboard(false);
+  if(btn) setTimeout(() => btn.classList.remove('spinning'), 400);
+}
 let state = {
   student: null,
   lang: 'ko',
@@ -1916,7 +2284,7 @@ function logout(){
   backToClassSelect();
 }
 
-async function updateDashboard(){
+async function updateDashboard(forceRefresh){
   const s = state.student;
   const dash = document.getElementById('user-dashboard');
   if(!s){ dash.style.display = 'none'; return; }
@@ -1924,10 +2292,9 @@ async function updateDashboard(){
   document.getElementById('dash-name').textContent = '1학년 ' + s.cls + '반 ' + s.name;
   dash.style.display = 'block';
 
-  // 랭킹 서버에서 내 기록 및 순위 조회
+  // 랭킹 서버에서 내 기록 및 순위 조회 (캐시 사용)
   try{
-    const res = await fetch(MEAL_SERVER_URL + '?action=rankings');
-    const data = await res.json();
+    const data = await fetchRankings(forceRefresh);
     const all = (data.rankings || []).filter(r => r);
     // 한글/영어 중 더 높은 최고 기록 사용
     const myRow = all.find(r => String(r.cls) === String(s.cls) && String(r.number) === String(s.number));
@@ -2453,8 +2820,10 @@ async function saveResult(adjusted, cpm, accuracy){
     if(data && data.pointsAwarded){
       renderPointsEarned(data.pointsAwarded, data.totalPoints);
     }
-    // 홈 대시보드 갱신 (백그라운드)
-    updateDashboard();
+    // 캐시 무효화 - 방금 친 새 기록 반영되도록
+    invalidateRankingCache();
+    // 홈 대시보드 갱신 (백그라운드, 새 데이터로)
+    updateDashboard(true);
   } catch(e){
     console.error('저장 실패', e);
   }
@@ -3094,8 +3463,7 @@ async function requestPurchase(itemCode, price, itemName){
   // 포인트 확인
   let currentPoints = 0;
   try{
-    const res = await fetch(MEAL_SERVER_URL + '?action=rankings');
-    const data = await res.json();
+    const data = await fetchRankings(true);
     const me = (data.rankings || []).find(r => String(r.cls) === String(state.student.cls) && String(r.number) === String(state.student.number));
     currentPoints = me ? (Number(me.points) || 0) : 0;
   } catch(e){}
@@ -3130,6 +3498,338 @@ async function requestPurchase(itemCode, price, itemName){
     alert('❌ 요청 실패: ' + e.message);
   }
 }
+
+// ============================================
+// 상점 (Shop) - 학생용
+// ============================================
+let shopState = {
+  category: 'border',
+  balance: 0,
+  owned: { border: [], background: [], badge: [], avatar: [] }
+};
+
+async function goShop(){
+  if(!state.student){
+    alert('먼저 선수 입장하고 이용해주세요!');
+    return;
+  }
+  showScreen('screen-shop');
+  await refreshShopBalance();
+  await loadOwnedItems();
+  setShopCategory('border');
+}
+
+async function refreshShopBalance(){
+  try{
+    const data = await fetchRankings();
+    const me = (data.rankings || []).find(r => String(r.cls) === String(state.student.cls) && String(r.number) === String(state.student.number));
+    shopState.balance = me ? (Number(me.points) || 0) : 0;
+    const balanceEl = document.getElementById('shop-balance');
+    if(balanceEl) balanceEl.textContent = '💎 ' + shopState.balance.toLocaleString() + 'P';
+  } catch(e){ console.error(e); }
+}
+
+async function loadOwnedItems(){
+  if(!state.student) return;
+  try{
+    const url = MEAL_SERVER_URL + '?action=ownedItems&cls=' + encodeURIComponent(state.student.cls) + '&number=' + encodeURIComponent(state.student.number);
+    const res = await fetch(url);
+    const data = await res.json();
+    shopState.owned = data.owned || { border: [], background: [], badge: [], avatar: [] };
+    // 기본값 채우기
+    ['border', 'background', 'badge', 'avatar'].forEach(c => {
+      if(!Array.isArray(shopState.owned[c])) shopState.owned[c] = [];
+    });
+  } catch(e){
+    console.error('보유 아이템 로드 실패', e);
+  }
+}
+
+function setShopCategory(cat){
+  shopState.category = cat;
+  ['border', 'background', 'badge', 'avatar', 'freetime'].forEach(c => {
+    const el = document.getElementById('shop-tab-' + c);
+    if(el) el.classList.toggle('active', c === cat);
+  });
+  renderShopItems();
+}
+
+function renderShopItems(){
+  const wrap = document.getElementById('shop-items-wrap');
+  if(!wrap) return;
+
+  if(shopState.category === 'freetime'){
+    // 자유시간 상점
+    wrap.innerHTML =
+      '<p class="tp-sub" style="color:var(--muted); margin-bottom:8px;">📌 자유시간은 선생님 승인이 필요해요</p>' +
+      '<div class="tp-shop-grid" style="grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));">' +
+        '<div class="tp-shop-card">' +
+          '<div class="tp-shop-card-preview"><span style="font-size:36px;">🎫</span></div>' +
+          '<div class="tp-shop-card-name">자유시간 5분</div>' +
+          '<div class="tp-shop-card-price">3,000P</div>' +
+          '<button class="tp-shop-card-btn" onclick="requestPurchase(\'freetime5\', 3000, \'자유시간 5분 쿠폰\')">구매 요청</button>' +
+        '</div>' +
+        '<div class="tp-shop-card">' +
+          '<div class="tp-shop-card-preview"><span style="font-size:36px;">🎫</span></div>' +
+          '<div class="tp-shop-card-name">자유시간 10분</div>' +
+          '<div class="tp-shop-card-price">6,000P</div>' +
+          '<button class="tp-shop-card-btn" onclick="requestPurchase(\'freetime10\', 6000, \'자유시간 10분 쿠폰\')">구매 요청</button>' +
+        '</div>' +
+      '</div>';
+    return;
+  }
+
+  const items = SHOP_ITEMS[shopState.category] || [];
+  const ownedIds = shopState.owned[shopState.category] || [];
+
+  // 티어별로 그룹
+  const tiers = ['basic', 'premium', 'legendary'];
+  let html = '';
+  tiers.forEach(tier => {
+    const inTier = items.filter(i => i.tier === tier);
+    if(inTier.length === 0) return;
+    html += '<div class="tp-shop-tier-header ' + tier + '">' + TIER_LABEL[tier] + ' ' + inTier[0].price + 'P</div>';
+    html += '<div class="tp-shop-grid">';
+    inTier.forEach(item => {
+      const isOwned = ownedIds.includes(item.id);
+      html += '<div class="tp-shop-card' + (isOwned ? ' owned' : '') + '">' +
+        '<div class="tp-shop-card-preview">' + renderItemPreview(shopState.category, item) + '</div>' +
+        '<div class="tp-shop-card-name">' + escapeText(item.name) + '</div>' +
+        '<div class="tp-shop-card-price">' + item.price + 'P</div>' +
+        (isOwned
+          ? '<button class="tp-shop-card-btn owned" disabled>✓ 보유중</button>'
+          : '<button class="tp-shop-card-btn" onclick="buyShopItem(\'' + shopState.category + '\', \'' + item.id + '\')">구매</button>'
+        ) +
+      '</div>';
+    });
+    html += '</div>';
+  });
+
+  wrap.innerHTML = html;
+}
+
+function renderItemPreview(category, item){
+  if(category === 'avatar' || category === 'badge'){
+    return '<span class="preview-emoji-lg">' + item.emoji + '</span>';
+  } else if(category === 'background'){
+    return '<div class="preview-swatch" style="background:' + item.bg + ';"></div>';
+  } else if(category === 'border'){
+    // 테두리 미리보기 - 색 스와치 + 테두리 표시
+    let borderStyle;
+    if(item.color === 'rainbow') borderStyle = 'linear-gradient(90deg, #ff8fab, #fbbf24, #57c99b, #a9a0ff)';
+    else if(item.color === 'sparkle') borderStyle = 'linear-gradient(135deg, #fcd34d, #fff, #a9a0ff, #fff)';
+    else borderStyle = item.color;
+    return '<div style="width:80%; height:40px; border-radius:20px; border:3px solid transparent; background:' + (borderStyle.includes('gradient') ? borderStyle : borderStyle) + '; box-shadow:0 0 0 3px ' + (borderStyle.includes('gradient') ? '#fff' : borderStyle) + ' inset;"></div>';
+  }
+  return '';
+}
+
+async function buyShopItem(category, itemId){
+  const item = getShopItem(category, itemId);
+  if(!item) return;
+  if(shopState.balance < item.price){
+    alert('포인트가 부족해요!\n\n필요: ' + item.price.toLocaleString() + 'P\n보유: ' + shopState.balance.toLocaleString() + 'P');
+    return;
+  }
+  if(!confirm('"' + item.name + '"을(를) 구매할까요?\n\n💎 ' + item.price.toLocaleString() + 'P 사용\n(꾸미기는 즉시 처리돼요)')) return;
+
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'buyItem',
+        cls: state.student.cls,
+        number: state.student.number,
+        category: category,
+        itemId: itemId,
+        price: item.price
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      // 로컬 상태 업데이트
+      shopState.balance = Number(data.balance) || (shopState.balance - item.price);
+      if(!shopState.owned[category].includes(itemId)) shopState.owned[category].push(itemId);
+      invalidateRankingCache();
+      // UI 갱신
+      const balanceEl = document.getElementById('shop-balance');
+      if(balanceEl) balanceEl.textContent = '💎 ' + shopState.balance.toLocaleString() + 'P';
+      renderShopItems();
+      alert('✅ 구매 완료!\n"내 꾸미기"에서 장착할 수 있어요.');
+    } else {
+      alert('❌ 구매 실패: ' + (data.error || '알 수 없는 오류'));
+    }
+  } catch(e){
+    alert('❌ 구매 실패: ' + e.message);
+  }
+}
+
+// ============================================
+// 내 꾸미기 (My Style)
+// ============================================
+let myStyleState = {
+  category: 'border',
+  equipped: { border: null, background: null, badge: null, avatar: null }
+};
+
+async function goMyStyle(){
+  if(!state.student){
+    alert('먼저 선수 입장하고 이용해주세요!');
+    return;
+  }
+  showScreen('screen-mystyle');
+  await loadOwnedItems();
+  await loadEquipped();
+  setMyStyleCategory('border');
+  updateMyStylePreview();
+}
+
+async function loadEquipped(){
+  if(!state.student) return;
+  try{
+    const url = MEAL_SERVER_URL + '?action=equippedItems&cls=' + encodeURIComponent(state.student.cls) + '&number=' + encodeURIComponent(state.student.number);
+    const res = await fetch(url);
+    const data = await res.json();
+    myStyleState.equipped = data.equipped || { border: null, background: null, badge: null, avatar: null };
+  } catch(e){
+    console.error('장착 아이템 로드 실패', e);
+  }
+}
+
+function setMyStyleCategory(cat){
+  myStyleState.category = cat;
+  ['border', 'background', 'badge', 'avatar'].forEach(c => {
+    const el = document.getElementById('mystyle-tab-' + c);
+    if(el) el.classList.toggle('active', c === cat);
+  });
+  renderMyStyleItems();
+}
+
+function renderMyStyleItems(){
+  const wrap = document.getElementById('mystyle-items-wrap');
+  if(!wrap) return;
+  const cat = myStyleState.category;
+  const ownedIds = shopState.owned[cat] || [];
+  const equippedId = myStyleState.equipped[cat];
+
+  const owned = SHOP_ITEMS[cat].filter(i => ownedIds.includes(i.id));
+
+  if(owned.length === 0){
+    wrap.innerHTML = '<div class="tp-empty">이 종류의 아이템을 아직 안 샀어요.<br><button class="tp-btn" style="margin-top:12px;" onclick="goShop()">🛍️ 상점 가기</button></div>';
+    return;
+  }
+
+  // "장착 안함" 옵션 + 소유 아이템
+  let html = '<div class="tp-shop-grid">';
+  html += '<div class="tp-shop-card' + (!equippedId ? ' owned' : '') + '">' +
+    '<div class="tp-shop-card-preview" style="opacity:0.5;">❌</div>' +
+    '<div class="tp-shop-card-name">장착 안 함</div>' +
+    '<div class="tp-shop-card-price" style="visibility:hidden;">.</div>' +
+    (equippedId
+      ? '<button class="tp-shop-card-btn" onclick="equipItem(\'' + cat + '\', \'\')">해제</button>'
+      : '<button class="tp-shop-card-btn owned" disabled>✓ 지금 설정</button>'
+    ) +
+  '</div>';
+
+  owned.forEach(item => {
+    const isEquipped = equippedId === item.id;
+    html += '<div class="tp-shop-card' + (isEquipped ? ' owned' : '') + '">' +
+      '<div class="tp-shop-card-preview">' + renderItemPreview(cat, item) + '</div>' +
+      '<div class="tp-shop-card-name">' + escapeText(item.name) + '</div>' +
+      '<div class="tp-shop-card-price" style="visibility:hidden;">.</div>' +
+      (isEquipped
+        ? '<button class="tp-shop-card-btn owned" disabled>✓ 장착중</button>'
+        : '<button class="tp-shop-card-btn" onclick="equipItem(\'' + cat + '\', \'' + item.id + '\')">장착</button>'
+      ) +
+    '</div>';
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+async function equipItem(category, itemId){
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'equipItem',
+        cls: state.student.cls,
+        number: state.student.number,
+        category: category,
+        itemId: itemId  // 빈 문자열이면 해제
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      myStyleState.equipped[category] = itemId || null;
+      invalidateRankingCache();
+      renderMyStyleItems();
+      updateMyStylePreview();
+    } else {
+      alert('❌ 장착 실패: ' + (data.error || '알 수 없는 오류'));
+    }
+  } catch(e){
+    alert('❌ 장착 실패: ' + e.message);
+  }
+}
+
+function updateMyStylePreview(){
+  const row = document.getElementById('mystyle-preview-row');
+  if(!row || !state.student) return;
+  document.getElementById('mystyle-preview-name').textContent = state.student.name;
+
+  // 배지
+  const badgeEl = document.getElementById('mystyle-preview-badge');
+  const badgeId = myStyleState.equipped.badge;
+  if(badgeEl){
+    if(badgeId){
+      const badge = getShopItem('badge', badgeId);
+      badgeEl.textContent = badge ? badge.emoji : '';
+    } else {
+      badgeEl.textContent = '';
+    }
+  }
+
+  // 배경
+  const bgId = myStyleState.equipped.background;
+  if(bgId){
+    const bg = getShopItem('background', bgId);
+    if(bg) row.style.background = bg.bg;
+  } else {
+    row.style.background = '';
+  }
+
+  // 테두리
+  const borderId = myStyleState.equipped.border;
+  if(borderId){
+    const border = getShopItem('border', borderId);
+    if(border){
+      if(border.color === 'rainbow'){
+        row.style.borderColor = 'transparent';
+        row.style.backgroundImage = 'linear-gradient(' + (row.style.background || '#fff') + ', ' + (row.style.background || '#fff') + '), linear-gradient(90deg, #ff8fab, #fbbf24, #57c99b, #a9a0ff)';
+        row.style.backgroundOrigin = 'border-box';
+        row.style.backgroundClip = 'padding-box, border-box';
+        row.style.borderWidth = '3px';
+        row.style.borderStyle = 'solid';
+      } else if(border.color === 'sparkle'){
+        row.style.borderColor = '#fcd34d';
+        row.style.borderWidth = '3px';
+        row.style.borderStyle = 'dashed';
+      } else {
+        row.style.borderColor = border.color;
+        row.style.borderWidth = '3px';
+        row.style.borderStyle = 'solid';
+        row.style.backgroundImage = '';
+      }
+    }
+  } else {
+    row.style.borderColor = '';
+    row.style.borderWidth = '';
+    row.style.borderStyle = '';
+    row.style.backgroundImage = '';
+  }
+}
+
 
 // ============================================
 // 포인트 관리 (관리자용)
@@ -3798,12 +4498,13 @@ function setRankLang(lang){
   loadRanking();
 }
 
-async function loadRanking(){
+async function loadRanking(forceRefresh){
   const wrap = document.getElementById('rank-list-wrap');
-  wrap.innerHTML = '<div class="tp-loading">불러오는 중...</div>';
+  // 캐시 있으면 로딩 표시 안 하고 바로 그리기
+  const hasCache = rankingCache.data && (Date.now() - rankingCache.at) < rankingCache.TTL;
+  if(!hasCache || forceRefresh) wrap.innerHTML = '<div class="tp-loading">불러오는 중...</div>';
   try{
-    const res = await fetch(MEAL_SERVER_URL + '?action=rankings');
-    const data = await res.json();
+    const data = await fetchRankings(forceRefresh);
     const valid = (data.rankings || []).filter(r => r);
 
     if(valid.length === 0){
