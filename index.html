@@ -3121,7 +3121,8 @@ function openNoticeById(idx){
   const cache = window._noticeCache;
   if(!cache || !cache[idx]) return;
   const n = cache[idx];
-  openNoticeModal(n.title, n.body, formatNoticeDate(n.at), idx + 1);
+  const num = (window._noticeTotalCount || cache.length) - idx;
+  openNoticeModal(n.title, n.body, formatNoticeDate(n.at), num);
 }
 
 function openNoticeModal(title, body, date, num){
@@ -3226,11 +3227,12 @@ async function loadNoticeList(){
     }
     // 전역에 공지 저장 (인덱스로 접근)
     window._noticeCache = notices.slice(0, 3);
+    window._noticeTotalCount = notices.length; // 오래된 공지=1, 새 공지일수록 큰 번호
     wrap.innerHTML = '<div class="tp-notice-list">' +
       window._noticeCache.map((n, i) =>
         '<div class="tp-notice-card" onclick="openNoticeById(' + i + ')">' +
           '<div class="tp-notice-meta">' +
-            '<span class="tp-notice-num">공지 ' + (i + 1) + '</span>' +
+            '<span class="tp-notice-num">공지 ' + (window._noticeTotalCount - i) + '</span>' +
             '<span class="tp-notice-date">' + formatNoticeDate(n.at) + '</span>' +
           '</div>' +
           '<div class="tp-notice-title">📌 ' + escapeText(n.title) + '</div>' +
