@@ -3514,9 +3514,13 @@ async function goShop(){
     return;
   }
   showScreen('screen-shop');
-  await refreshShopBalance();
-  await loadOwnedItems();
+  // 카테고리 먼저 세팅해서 UI 뜨게 하기 (로딩 표시)
   setShopCategory('border');
+  // 잔액과 보유 아이템 병렬 조회 (기다림 없이)
+  Promise.all([refreshShopBalance(), loadOwnedItems()]).then(() => {
+    // 데이터 오면 다시 렌더
+    renderShopItems();
+  });
 }
 
 async function refreshShopBalance(){
@@ -3678,10 +3682,12 @@ async function goMyStyle(){
     return;
   }
   showScreen('screen-mystyle');
-  await loadOwnedItems();
-  await loadEquipped();
   setMyStyleCategory('border');
-  updateMyStylePreview();
+  // 병렬 로딩
+  Promise.all([loadOwnedItems(), loadEquipped()]).then(() => {
+    renderMyStyleItems();
+    updateMyStylePreview();
+  });
 }
 
 async function loadEquipped(){
@@ -3778,6 +3784,15 @@ function updateMyStylePreview(){
   if(!row || !state.student) return;
   document.getElementById('mystyle-preview-name').textContent = state.student.name;
 
+  // 초기화
+  row.style.background = '';
+  row.style.backgroundImage = '';
+  row.style.backgroundColor = '';
+  row.style.border = '';
+  row.style.borderColor = '';
+  row.style.borderWidth = '';
+  row.style.borderStyle = '';
+
   // 배지
   const badgeEl = document.getElementById('mystyle-preview-badge');
   const badgeId = myStyleState.equipped.badge;
@@ -3785,6 +3800,7 @@ function updateMyStylePreview(){
     if(badgeId){
       const badge = getShopItem('badge', badgeId);
       badgeEl.textContent = badge ? badge.emoji : '';
+      badgeEl.style.fontSize = '18px';
     } else {
       badgeEl.textContent = '';
     }
@@ -3792,11 +3808,20 @@ function updateMyStylePreview(){
 
   // 배경
   const bgId = myStyleState.equipped.background;
+  let bgValue = '#fff';
   if(bgId){
     const bg = getShopItem('background', bgId);
-    if(bg) row.style.background = bg.bg;
+    if(bg && bg.bg){
+      bgValue = bg.bg;
+      if(bgValue.indexOf('gradient') > -1){
+        row.style.backgroundImage = bgValue;
+        row.style.backgroundColor = '#fff';
+      } else {
+        row.style.backgroundColor = bgValue;
+      }
+    }
   } else {
-    row.style.background = '';
+    row.style.backgroundColor = 'var(--panel)';
   }
 
   // 테두리
@@ -3805,28 +3830,48 @@ function updateMyStylePreview(){
     const border = getShopItem('border', borderId);
     if(border){
       if(border.color === 'rainbow'){
-        row.style.borderColor = 'transparent';
-        row.style.backgroundImage = 'linear-gradient(' + (row.style.background || '#fff') + ', ' + (row.style.background || '#fff') + '), linear-gradient(90deg, #ff8fab, #fbbf24, #57c99b, #a9a0ff)';
-        row.style.backgroundOrigin = 'border-box';
-        row.style.backgroundClip = 'padding-box, border-box';
         row.style.borderWidth = '3px';
         row.style.borderStyle = 'solid';
+        row.style.borderImage = 'linear-gradient(90deg, #ff8fab, #fbbf24, #57c99b, #a9a0ff) 1';
       } else if(border.color === 'sparkle'){
-        row.style.borderColor = '#fcd34d';
         row.style.borderWidth = '3px';
         row.style.borderStyle = 'dashed';
+        row.style.borderColor = '#fcd34d';
+        row.style.borderImage = '';
       } else {
-        row.style.borderColor = border.color;
         row.style.borderWidth = '3px';
         row.style.borderStyle = 'solid';
-        row.style.backgroundImage = '';
+        row.style.borderColor = border.color;
+        row.style.borderImage = '';
       }
     }
   } else {
-    row.style.borderColor = '';
+    // 기본 테두리 유지
     row.style.borderWidth = '';
     row.style.borderStyle = '';
-    row.style.backgroundImage = '';
+    row.style.borderColor = '';
+    row.style.borderImage = '';
+  }
+
+  // 아바타 (이름 앞에)
+  const avatarId = myStyleState.equipped.avatar;
+  let nameEl = document.getElementById('mystyle-preview-name');
+  if(nameEl){
+    // 아바타 표시용 요소 확인/생성
+    let avatarEl = document.getElementById('mystyle-preview-avatar');
+    if(!avatarEl){
+      avatarEl = document.createElement('span');
+      avatarEl.id = 'mystyle-preview-avatar';
+      avatarEl.style.marginRight = '4px';
+      avatarEl.style.fontSize = '18px';
+      nameEl.parentElement.insertBefore(avatarEl, nameEl);
+    }
+    if(avatarId){
+      const avatar = getShopItem('avatar', avatarId);
+      avatarEl.textContent = avatar ? avatar.emoji : '';
+    } else {
+      avatarEl.textContent = '';
+    }
   }
 }
 
