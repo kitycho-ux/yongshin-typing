@@ -770,6 +770,68 @@
   }
   #student-edit-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
 
+  /* 포인트 획득 팝업 */
+  #points-popup-modal{
+    position:fixed;
+    inset:0;
+    z-index:1200;
+    background:rgba(91,74,95,0.5);
+    backdrop-filter:blur(4px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #points-popup-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
+  .tp-points-popup-box{
+    background:var(--panel);
+    border-radius:20px;
+    padding:26px 22px;
+    max-width:340px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 12px 30px rgba(91,74,95,0.25);
+    animation:popupPop .25s ease;
+  }
+  @keyframes popupPop{
+    0%{ transform:scale(0.8); opacity:0; }
+    100%{ transform:scale(1); opacity:1; }
+  }
+  .tp-points-popup-emoji{ font-size:42px; margin-bottom:6px; }
+  .tp-points-popup-title{
+    font-family:'Jua', sans-serif;
+    font-size:18px;
+    color:var(--text);
+    margin-bottom:14px;
+  }
+  .tp-points-popup-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+  .tp-points-popup-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--panel2);
+    border-radius:10px;
+    padding:8px 14px;
+    font-size:13px;
+  }
+  .tp-points-popup-row .amount{ font-family:'Jua', sans-serif; color:var(--accent); }
+  .tp-points-popup-total{
+    font-family:'Jua', sans-serif;
+    font-size:20px;
+    color:var(--accent);
+    margin-bottom:16px;
+  }
+  .tp-points-popup-close{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    padding:10px 24px;
+    font-family:'Jua', sans-serif;
+    font-size:14px;
+    cursor:pointer;
+  }
+
   .tp-sa-student-item{
     background:var(--panel2);
     border-radius:10px;
@@ -1563,6 +1625,17 @@
           <button class="tp-modal-close" onclick="closeNoticeModal()">✕</button>
         </div>
         <div class="tp-modal-body" id="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- 포인트 획득 팝업 -->
+    <div id="points-popup-modal" onclick="closePointsPopup(event)">
+      <div class="tp-points-popup-box" onclick="event.stopPropagation()">
+        <div class="tp-points-popup-emoji" id="points-popup-emoji">🎉</div>
+        <div class="tp-points-popup-title" id="points-popup-title">포인트 획득!</div>
+        <div class="tp-points-popup-list" id="points-popup-list"></div>
+        <div class="tp-points-popup-total" id="points-popup-total"></div>
+        <button class="tp-points-popup-close" onclick="closePointsPopup()">확인!</button>
       </div>
     </div>
 
@@ -2939,6 +3012,7 @@ async function saveResult(adjusted, cpm, accuracy, elapsedSec, chars){
     // 포인트 결과 표시 (유효하지 않은 연습이면 pointsAwarded가 비어있음)
     if(data && data.pointsAwarded && data.pointsAwarded.length > 0){
       renderPointsEarned(data.pointsAwarded, data.totalPoints);
+      showPointsPopup(data.pointsAwarded, data.totalPoints, { emoji: '🎉', title: '포인트 획득!' });
     }
     // 캐시 무효화 - 방금 친 새 기록 반영되도록
     invalidateRankingCache();
@@ -2967,6 +3041,33 @@ function renderPointsEarned(awarded, totalPoints){
   document.getElementById('result-points-total').textContent = total;
   document.getElementById('result-points-current').textContent = (Number(totalPoints) || 0).toLocaleString();
   card.style.display = 'block';
+}
+
+// 포인트 획득 팝업 - 연습 결과/배틀 결과 등 포인트를 받을 때마다 확실하게 보여주는 팝업
+function showPointsPopup(awarded, totalPoints, opts){
+  if(!awarded || awarded.length === 0) return;
+  opts = opts || {};
+  document.getElementById('points-popup-emoji').textContent = opts.emoji || '🎉';
+  document.getElementById('points-popup-title').textContent = opts.title || '포인트 획득!';
+  const list = document.getElementById('points-popup-list');
+  list.innerHTML = awarded.map(a =>
+    '<div class="tp-points-popup-row">' +
+      '<span>' + escapeText(a.label) + '</span>' +
+      '<span class="amount">+' + a.amount + 'P</span>' +
+    '</div>'
+  ).join('');
+  const total = awarded.reduce((sum, a) => sum + (Number(a.amount) || 0), 0);
+  const totalEl = document.getElementById('points-popup-total');
+  if(totalPoints !== null && totalPoints !== undefined){
+    totalEl.textContent = '총 +' + total + 'P (보유 ' + (Number(totalPoints) || 0).toLocaleString() + 'P)';
+  } else {
+    totalEl.textContent = '총 +' + total + 'P';
+  }
+  document.getElementById('points-popup-modal').classList.add('open');
+}
+function closePointsPopup(event){
+  if(event && event.target !== document.getElementById('points-popup-modal')) return;
+  document.getElementById('points-popup-modal').classList.remove('open');
 }
 
 const TEACHER_PW = '7979';
@@ -4159,7 +4260,8 @@ let battleState = {
   totalKeystrokes: 0,
   totalCorrect: 0,
   totalTyped: 0,
-  sentencesDone: 0
+  sentencesDone: 0,
+  winnerBonusGiven: null
 };
 
 function goBattleLobby(){
@@ -4280,6 +4382,7 @@ async function pollBattleRoom(){
 function handleRoomUpdate(room){
   battleState.players = room.players || [];
   battleState.settings = room.settings || battleState.settings;
+  battleState.winnerBonusGiven = room.winnerBonusGiven || null;
   const prevStatus = battleState.status;
   battleState.status = room.status;
 
@@ -4624,6 +4727,18 @@ function showBattleResult(){
   // 방장만 "한 판 더" 버튼 보임
   document.getElementById('battle-again-btn').style.display = battleState.isHost ? 'block' : 'none';
   showScreen('screen-battle-result');
+
+  // 배틀 1등 포인트 보너스 팝업 (동점이면 여러 명일 수 있음)
+  if(me && battleState.winnerBonusGiven && battleState.winnerBonusGiven.length > 0){
+    const iWon = battleState.winnerBonusGiven.some(w => String(w.cls) === String(me.cls) && String(w.number) === String(me.number));
+    if(iWon){
+      showPointsPopup(
+        [{ label: '🏆 배틀 1등!', amount: 10 }],
+        null,
+        { emoji: '🏆', title: '배틀 우승!' }
+      );
+    }
+  }
 }
 
 async function rematchBattle(){
