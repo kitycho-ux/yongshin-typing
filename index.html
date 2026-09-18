@@ -442,6 +442,13 @@
   .tp-passage .cursor{ border-left:2px solid var(--blue); animation:tpBlink 1s step-start infinite; }
   @keyframes tpBlink{ 50%{ border-color:transparent; } }
 
+  /* 배틀 화면은 오른쪽에 순위 카드가 있어서 문장 칸이 좁아지는 만큼,
+     글자 크기와 칸 높이를 더 키워서 타자연습이랑 비슷하게 보이게 함 */
+  #battle-passage{
+    font-size:clamp(26px, 5.4vw, 60px);
+    height:clamp(180px, 28vw, 280px);
+  }
+
   #hit-feedback{
     position:relative;
     height:0;
@@ -1525,6 +1532,10 @@
             <p class="tp-sub" style="text-align:center; margin-top:6px; color:var(--muted); font-size:11px;">💡 자유시간 쿠폰은 상점 안에서 살 수 있어요</p>
 
             <div class="tp-point-grid" style="margin-top:14px;">
+              <div class="tp-point-item">
+                <div class="tp-point-row"><strong>연습 참여</strong><span class="tp-point-badge">+5P</span></div>
+                <p class="tp-point-desc">연습을 마칠 때마다 항상 받아요</p>
+              </div>
               <div class="tp-point-item">
                 <div class="tp-point-row"><strong>순위 보상</strong><span class="tp-point-badge">1위 100P · 2위 70P · 3위 50P</span></div>
                 <p class="tp-point-desc">상위 30% 30P · 완주자 10P (한글/영어 각각)</p>
