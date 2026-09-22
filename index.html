@@ -776,6 +776,42 @@
     padding:20px;
   }
   #student-edit-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
+  #item-admin-modal{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(91,74,95,0.45);
+    backdrop-filter:blur(4px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #item-admin-modal.open{ display:flex; animation:modalFadeIn .2s ease; }
+  .tp-iam-item{
+    background:var(--panel2);
+    border-radius:10px;
+    padding:8px 12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+    font-size:13px;
+  }
+  .tp-iam-item .tp-iam-name{ display:flex; align-items:center; gap:6px; }
+  .tp-iam-item .tp-iam-cat{ font-size:10px; color:var(--muted); background:var(--panel); border-radius:8px; padding:1px 6px; }
+  .tp-iam-item .tp-iam-cancel{
+    background:var(--warn);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:5px 10px;
+    font-size:11px;
+    font-family:'Jua', sans-serif;
+    cursor:pointer;
+    white-space:nowrap;
+  }
 
   /* 포인트 획득 팝업 */
   #points-popup-modal{
@@ -1870,6 +1906,22 @@
       </div>
     </div>
 
+    <!-- 학생 꾸미기 아이템 관리 모달 (관리자용 - 잘못 산 아이템 취소/환불) -->
+    <div id="item-admin-modal" onclick="closeItemAdminModal(event)">
+      <div class="tp-modal-box" onclick="event.stopPropagation()" style="max-width:420px;">
+        <div class="tp-modal-head">
+          <h2 class="tp-modal-title" id="iam-title">🎒 산 아이템 관리</h2>
+          <button class="tp-modal-close" onclick="closeItemAdminModal()">✕</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <p class="tp-sub" style="margin:0;">잘못 산 아이템은 취소하면 포인트가 자동으로 환불돼요.</p>
+          <div id="iam-list"></div>
+          <button class="tp-btn ghost" id="iam-reset-all-btn" style="color:var(--warn); border-color:var(--warn); display:none;" onclick="resetAllStudentItems()">🗑️ 전체 초기화 (모두 취소 + 환불)</button>
+          <p class="tp-sub" id="iam-msg" style="display:none;"></p>
+        </div>
+      </div>
+    </div>
+
     <!-- POINT ADMIN -->
     <div class="tp-screen" id="screen-point-admin">
       <button class="tp-back-btn" onclick="goHome();">← 처음으로</button>
@@ -2478,7 +2530,7 @@ function confirmIdentity(student){
 
 function logout(){
   state.student = null;
-  try{ localStorage.removeItem('tadak_lastStudent'); } catch(e){}
+  try{ sessionStorage.removeItem('tadak_lastStudent'); } catch(e){}
   document.getElementById('user-dashboard').style.display = 'none';
   document.getElementById('step-confirmed').style.display = 'none';
   document.getElementById('post-identity').style.display = 'none';
@@ -2536,7 +2588,7 @@ async function updateDashboard(forceRefresh){
 
 function resetIdentity(){
   state.student = null;
-  try{ localStorage.removeItem('tadak_lastStudent'); } catch(e){}
+  try{ sessionStorage.removeItem('tadak_lastStudent'); } catch(e){}
   const confirmed = document.getElementById('step-confirmed');
   const postIdentity = document.getElementById('post-identity');
   const loginSub = document.getElementById('login-sub');
@@ -2558,7 +2610,7 @@ function resetIdentity(){
 
 async function saveLastStudent(student){
   try{
-    localStorage.setItem('tadak_lastStudent', JSON.stringify(student));
+    sessionStorage.setItem('tadak_lastStudent', JSON.stringify(student));
   } catch(e){
     console.error('학생 정보 저장 실패', e);
   }
@@ -2566,7 +2618,7 @@ async function saveLastStudent(student){
 
 async function restoreLastStudent(){
   try{
-    const raw = localStorage.getItem('tadak_lastStudent');
+    const raw = sessionStorage.getItem('tadak_lastStudent');
     if(raw){
       const s = JSON.parse(raw);
       if(s && s.cls && s.number && s.name){
@@ -4245,11 +4297,136 @@ function renderPointsAdminList(){
     return;
   }
   wrap.innerHTML = inClass.map(r =>
-    '<div class="tp-pa-point-item">' +
-      '<span>' + r.number + '번 ' + escapeText(r.name) + '</span>' +
+    '<div class="tp-pa-point-item" style="cursor:pointer;" onclick="openItemAdminModal(\'' + r.cls + '\',\'' + r.number + '\',\'' + escapeText(r.name).replace(/'/g,"\\'") + '\')">' +
+      '<span>' + r.number + '번 ' + escapeText(r.name) + ' <span style="font-size:10px; color:var(--muted);">(꾸미기 관리 →)</span></span>' +
       '<span class="amount">' + Number(r.points || 0).toLocaleString() + 'P</span>' +
     '</div>'
   ).join('');
+}
+
+// ============================================
+// 학생 꾸미기 아이템 관리 (관리자용 - 잘못 산 아이템 취소/환불)
+// ============================================
+let itemAdminState = { cls: null, number: null, name: '' };
+
+async function openItemAdminModal(cls, number, name){
+  itemAdminState = { cls: String(cls), number: String(number), name: name };
+  document.getElementById('iam-title').textContent = '🎒 ' + cls + '반 ' + number + '번 ' + name;
+  document.getElementById('iam-msg').style.display = 'none';
+  document.getElementById('iam-list').innerHTML = '<div class="tp-loading">불러오는 중...</div>';
+  document.getElementById('iam-reset-all-btn').style.display = 'none';
+  document.getElementById('item-admin-modal').classList.add('open');
+  await loadItemAdminList();
+}
+
+function closeItemAdminModal(e){
+  if(e && e.target !== document.getElementById('item-admin-modal')) return;
+  document.getElementById('item-admin-modal').classList.remove('open');
+}
+
+async function loadItemAdminList(){
+  const wrap = document.getElementById('iam-list');
+  const { cls, number } = itemAdminState;
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=ownedItems&cls=' + cls + '&number=' + number);
+    const data = await res.json();
+    const owned = data.owned || {};
+    const rows = [];
+    Object.keys(owned).forEach(cat => {
+      (owned[cat] || []).forEach(itemId => {
+        const item = getShopItem(cat, itemId);
+        if(item) rows.push({ category: cat, itemId: itemId, name: item.name, price: item.price });
+      });
+    });
+    if(rows.length === 0){
+      wrap.innerHTML = '<div class="tp-empty-mini"><div style="font-size:20px;">📦</div><div>산 아이템이 없어요.</div></div>';
+      document.getElementById('iam-reset-all-btn').style.display = 'none';
+      return;
+    }
+    wrap.innerHTML = rows.map(r =>
+      '<div class="tp-iam-item">' +
+        '<span class="tp-iam-name"><span class="tp-iam-cat">' + escapeText(CATEGORY_LABEL[r.category] || r.category) + '</span>' + escapeText(r.name) + '</span>' +
+        '<button class="tp-iam-cancel" onclick="cancelSingleItem(\'' + r.category + '\',\'' + r.itemId + '\',' + r.price + ')">취소(+' + r.price + 'P)</button>' +
+      '</div>'
+    ).join('');
+    document.getElementById('iam-reset-all-btn').style.display = 'block';
+    document.getElementById('iam-reset-all-btn').textContent = '🗑️ 전체 초기화 (' + rows.length + '개 모두 취소, +' + rows.reduce((s,r)=>s+r.price,0) + 'P 환불)';
+  } catch(e){
+    wrap.innerHTML = '<div class="tp-empty-mini"><div>목록을 불러오지 못했어요.</div></div>';
+    console.error('아이템 목록 로드 실패', e);
+  }
+}
+
+async function cancelSingleItem(category, itemId, price){
+  const item = getShopItem(category, itemId);
+  const name = item ? item.name : itemId;
+  if(!confirm('"' + name + '"을(를) 취소할까요?\n\n💎 ' + price + 'P가 환불돼요.')) return;
+  const msg = document.getElementById('iam-msg');
+  try{
+    const res = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'cancelItems',
+        cls: itemAdminState.cls, number: itemAdminState.number,
+        items: [{ category: category, itemId: itemId, price: price }]
+      })
+    });
+    const data = await res.json();
+    if(data && data.success){
+      msg.textContent = '✅ 취소 완료! +' + data.refunded + 'P 환불됨';
+      msg.style.color = 'var(--mint)';
+      msg.style.display = 'block';
+      await loadItemAdminList();
+      loadPointsAdmin();
+    } else {
+      msg.textContent = '❌ 취소 실패: ' + (data.error || '오류');
+      msg.style.color = 'var(--warn)';
+      msg.style.display = 'block';
+    }
+  } catch(e){
+    msg.textContent = '❌ 취소 실패: ' + e.message;
+    msg.style.color = 'var(--warn)';
+    msg.style.display = 'block';
+  }
+}
+
+async function resetAllStudentItems(){
+  const { cls, number } = itemAdminState;
+  try{
+    const res = await fetch(MEAL_SERVER_URL + '?action=ownedItems&cls=' + cls + '&number=' + number);
+    const data = await res.json();
+    const owned = data.owned || {};
+    const items = [];
+    Object.keys(owned).forEach(cat => {
+      (owned[cat] || []).forEach(itemId => {
+        const item = getShopItem(cat, itemId);
+        if(item) items.push({ category: cat, itemId: itemId, price: item.price });
+      });
+    });
+    if(items.length === 0) return;
+    const total = items.reduce((s,r)=>s+r.price,0);
+    if(!confirm(itemAdminState.name + ' 학생이 산 아이템 ' + items.length + '개를 전부 취소할까요?\n\n💎 총 ' + total + 'P가 환불돼요.\n(이 작업은 되돌릴 수 없어요)')) return;
+
+    const res2 = await fetch(MEAL_SERVER_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'cancelItems', cls: cls, number: number, items: items })
+    });
+    const data2 = await res2.json();
+    const msg = document.getElementById('iam-msg');
+    if(data2 && data2.success){
+      msg.textContent = '✅ 전체 초기화 완료! +' + data2.refunded + 'P 환불됨';
+      msg.style.color = 'var(--mint)';
+      msg.style.display = 'block';
+      await loadItemAdminList();
+      loadPointsAdmin();
+    } else {
+      msg.textContent = '❌ 초기화 실패: ' + (data2.error || '오류');
+      msg.style.color = 'var(--warn)';
+      msg.style.display = 'block';
+    }
+  } catch(e){
+    alert('초기화 실패: ' + e.message);
+  }
 }
 
 
