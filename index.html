@@ -5253,4 +5253,39 @@ function showContentErrorBanner(){
   // 10초 후 자동 사라짐
   setTimeout(() => { if(banner.parentElement) banner.remove(); }, 10000);
 }
+
+// ===== 붙여넣기/드래그 입력 차단 (타자연습·배틀 입력창) =====
+(function(){
+  let lastWarn = 0;
+  function warn(){
+    const now = Date.now();
+    if(now - lastWarn < 2000) return;
+    lastWarn = now;
+    const d = document.createElement('div');
+    d.textContent = '붙여넣기는 사용할 수 없어요! 직접 타이핑해 주세요 ✍️';
+    d.style.cssText = 'position:fixed;left:50%;bottom:12%;transform:translateX(-50%);background:rgba(30,30,40,.92);color:#fff;padding:12px 20px;border-radius:12px;font-size:16px;font-weight:700;z-index:99999;pointer-events:none;';
+    document.body.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 1800);
+  }
+  function block(e){ e.preventDefault(); e.stopPropagation(); warn(); return false; }
+  ['test-input','battle-input'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    ['paste','drop','dragover','dragenter','cut','copy','contextmenu'].forEach(function(ev){
+      el.addEventListener(ev, block, true);
+    });
+    el.addEventListener('beforeinput', function(e){
+      const t = e.inputType || '';
+      if(t === 'insertFromPaste' || t === 'insertFromDrop' || t === 'insertFromYank' || t === 'insertReplacementText' || t === 'insertFromPasteAsQuotation'){
+        block(e);
+      }
+    }, true);
+    el.addEventListener('keydown', function(e){
+      const k = (e.key || '').toLowerCase();
+      if(((e.ctrlKey || e.metaKey) && (k === 'v' || k === 'x')) || (e.shiftKey && e.key === 'Insert')){
+        block(e);
+      }
+    }, true);
+  });
+})();
 </script>
