@@ -1470,6 +1470,17 @@
   .kp-board{ padding:8px; }
   .kp-key{ border-radius:8px; }
 }
+
+/* 손 모양 도우미를 켜면 위쪽을 압축해서 키보드가 한 화면에 들어오게 한다 */
+#screen-test.keyhelp-on .tp-passage{
+  padding:12px 16px;
+  font-size:clamp(18px, 2.6vw, 34px);
+  height:clamp(84px, 12vw, 132px);
+}
+#screen-test.keyhelp-on .tp-typebox{ padding:10px 14px; font-size:clamp(16px,2.2vw,26px); }
+#screen-test.keyhelp-on #keyhelp-board{ max-width:560px; padding:6px; }
+#screen-test.keyhelp-on .tp-stats-bar{ margin-top:4px; }
+#keyhelp-hint{ min-height:22px; }
 </style>
 
 <div class="tp-root">
@@ -2169,6 +2180,13 @@
       <div class="tp-passage" id="test-passage"></div>
       <input class="tp-typebox" id="test-input" type="text" placeholder="여기를 클릭하고 입력을 시작하세요" oninput="onType()" onkeydown="onEnterKey(event)" autocomplete="off">
       <p class="tp-sub" style="text-align:center; margin-top:-6px;">문장을 다 쳤으면 <strong>Enter</strong>를 눌러 다음 문장으로 넘어가세요</p>
+      <div style="display:flex; justify-content:center; margin:6px 0 2px;">
+        <button class="tp-btn ghost" id="keyhelp-toggle" onclick="toggleKeyHelp()" style="padding:8px 16px; font-size:14px;">⌨️ 손 모양 보기</button>
+      </div>
+      <div id="keyhelp-wrap" style="display:none;">
+        <p class="tp-sub" id="keyhelp-hint" style="text-align:center; margin:0 0 6px; font-weight:800;"></p>
+        <div class="kp-board" id="keyhelp-board" style="margin:0 auto;"></div>
+      </div>
       <div class="tp-stats-bar">
         <span>실시간 타수 <span class="tp-livecpm" id="test-cpm">0</span> 타/분</span>
         <span id="test-progress">0 / 0</span>
@@ -2845,6 +2863,132 @@ function countCorrectKeystrokes(typed, target){
 }
 
 
+
+
+// ============================================
+// 타자연습 손 모양 도우미
+// ============================================
+// 단어·문장 연습 화면 아래에 키보드와 손을 보여주고, 다음에 누를 키를 알려준다.
+// 기록·타수·포인트는 건드리지 않는다. 보기/끄기는 기기에 기억된다.
+function isKeyHelpOn(){
+  try { return localStorage.getItem('tadak_keyhelp') === '1'; } catch(e){ return false; }
+}
+function applyKeyHelpUI(){
+  const on = isKeyHelpOn();
+  const wrap = document.getElementById('keyhelp-wrap');
+  const btn = document.getElementById('keyhelp-toggle');
+  if(wrap) wrap.style.display = on ? '' : 'none';
+  if(btn) btn.textContent = on ? '⌨️ 손 모양 숨기기' : '⌨️ 손 모양 보기';
+  const scr = document.getElementById('screen-test');
+  if(scr) scr.classList.toggle('keyhelp-on', on);
+  if(on) updateKeyHelp();
+}
+function toggleKeyHelp(){
+  try { localStorage.setItem('tadak_keyhelp', isKeyHelpOn() ? '0' : '1'); } catch(e){}
+  applyKeyHelpUI();
+}
+
+function updateKeyHelp(){
+  if(!isKeyHelpOn()) return;
+  const board = document.getElementById('keyhelp-board');
+  if(!board) return;
+  const box = document.getElementById('test-input');
+  const typed = box ? box.value : '';
+  let next = kpNextKeyFor(typed, state.passage || '');
+
+  // 끝에 #이 붙어 있으면 Shift를 같이 눌러야 하는 키
+  let needShift = false;
+  if(next && next.slice(-1) === '#'){ needShift = true; next = next.slice(0, -1); }
+
+  const hint = document.getElementById('keyhelp-hint');
+  if(hint){
+    if(!next){
+      hint.textContent = (typed.length >= (state.passage || '').length)
+        ? 'Enter를 눌러 다음 문장으로!' : '';
+    } else if(next === 'Space'){
+      hint.innerHTML = '<span style="color:#2fa39c">●</span> 엄지로 띄어쓰기';
+    } else {
+      const f = KP_FINGER[next];
+      hint.innerHTML = '<span style="color:' + KP_FINGER_COLOR[f] + '">●</span> ' +
+        kpHand(next) + ' ' + KP_FINGER_NAME[f] +
+        (needShift ? ' <span style="color:#e05b5b">+ Shift</span>' : '');
+    }
+  }
+  board.innerHTML = kpBuildSVG({ lang: state.lang, target: next, showSpace: true });
+}
+
+// ============================================
+// 글자 -> 눌러야 할 키 순서로 바꾸기 (손 모양 도우미용)
+// ============================================
+// 한글은 두벌식 기준으로 초성/중성/종성을 분해해서 키 순서를 만든다.
+const KP_JAMO_KEY = {
+  // 자음
+  'ㄱ':['KeyR'], 'ㄲ':['KeyR#'], 'ㄴ':['KeyS'], 'ㄷ':['KeyE'], 'ㄸ':['KeyE#'],
+  'ㄹ':['KeyF'], 'ㅁ':['KeyA'], 'ㅂ':['KeyQ'], 'ㅃ':['KeyQ#'], 'ㅅ':['KeyT'],
+  'ㅆ':['KeyT#'], 'ㅇ':['KeyD'], 'ㅈ':['KeyW'], 'ㅉ':['KeyW#'], 'ㅊ':['KeyC'],
+  'ㅋ':['KeyZ'], 'ㅌ':['KeyX'], 'ㅍ':['KeyV'], 'ㅎ':['KeyG'],
+  // 모음
+  'ㅏ':['KeyK'], 'ㅐ':['KeyO'], 'ㅑ':['KeyI'], 'ㅒ':['KeyO#'], 'ㅓ':['KeyJ'],
+  'ㅔ':['KeyP'], 'ㅕ':['KeyU'], 'ㅖ':['KeyP#'], 'ㅗ':['KeyH'], 'ㅛ':['KeyY'],
+  'ㅜ':['KeyN'], 'ㅠ':['KeyB'], 'ㅡ':['KeyM'], 'ㅣ':['KeyL'],
+  // 겹모음 (두 번 눌러서 만든다)
+  'ㅘ':['KeyH','KeyK'], 'ㅙ':['KeyH','KeyO'], 'ㅚ':['KeyH','KeyL'],
+  'ㅝ':['KeyN','KeyJ'], 'ㅞ':['KeyN','KeyP'], 'ㅟ':['KeyN','KeyL'], 'ㅢ':['KeyM','KeyL'],
+  // 겹받침
+  'ㄳ':['KeyR','KeyT'], 'ㄵ':['KeyS','KeyW'], 'ㄶ':['KeyS','KeyG'],
+  'ㄺ':['KeyF','KeyR'], 'ㄻ':['KeyF','KeyA'], 'ㄼ':['KeyF','KeyQ'], 'ㄽ':['KeyF','KeyT'],
+  'ㄾ':['KeyF','KeyX'], 'ㄿ':['KeyF','KeyV'], 'ㅀ':['KeyF','KeyG'], 'ㅄ':['KeyQ','KeyT']
+};
+const KP_CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const KP_JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const KP_JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+// 영어/기호 -> 키
+const KP_EN_KEY = {
+  'q':'KeyQ','w':'KeyW','e':'KeyE','r':'KeyR','t':'KeyT','y':'KeyY','u':'KeyU','i':'KeyI','o':'KeyO','p':'KeyP',
+  'a':'KeyA','s':'KeyS','d':'KeyD','f':'KeyF','g':'KeyG','h':'KeyH','j':'KeyJ','k':'KeyK','l':'KeyL',';':'Semicolon',
+  'z':'KeyZ','x':'KeyX','c':'KeyC','v':'KeyV','b':'KeyB','n':'KeyN','m':'KeyM',',':'Comma','.':'Period','/':'Slash',
+  ' ':'Space'
+};
+
+// 문자열을 '눌러야 할 키' 순서로 바꾼다. 끝에 #이 붙으면 Shift를 같이 눌러야 하는 키.
+function kpTextToKeys(text){
+  const out = [];
+  if(!text) return out;
+  for(let i = 0; i < text.length; i++){
+    const ch = text[i];
+    const code = ch.charCodeAt(0);
+    if(code >= 0xAC00 && code <= 0xD7A3){
+      // 완성된 한글 글자 -> 초성/중성/종성으로 쪼갠다
+      const syl = code - 0xAC00;
+      const cho = KP_CHO[Math.floor(syl / 588)];
+      const jung = KP_JUNG[Math.floor((syl % 588) / 28)];
+      const jong = KP_JONG[syl % 28];
+      [cho, jung, jong].forEach(function(j){
+        if(j && KP_JAMO_KEY[j]) KP_JAMO_KEY[j].forEach(function(k){ out.push(k); });
+      });
+    } else if(KP_JAMO_KEY[ch]){
+      KP_JAMO_KEY[ch].forEach(function(k){ out.push(k); });
+    } else {
+      const lower = ch.toLowerCase();
+      const k = KP_EN_KEY[lower];
+      if(k) out.push(ch !== lower ? k + '#' : k);
+      // 모르는 글자(숫자, 따옴표 등)는 표시하지 않고 건너뛴다
+      else out.push('');
+    }
+  }
+  return out;
+}
+
+// 지금까지 친 글자와 목표 문장을 비교해, 다음에 눌러야 할 키를 찾는다
+function kpNextKeyFor(typed, target){
+  const want = kpTextToKeys(target);
+  const got = kpTextToKeys(typed);
+  let i = 0;
+  while(i < got.length && i < want.length && got[i] === want[i]) i++;
+  return want[i] || '';
+}
+
 // ============================================
 // 자리연습 (키보드 자리 익히기)
 // ============================================
@@ -3008,11 +3152,17 @@ function kpDrawHand(side, activeCode){
   return out;
 }
 
-function renderKpBoard(){
-  const chars = KP_CHARS[kpState.lang] || KP_CHARS.ko;
+// 스페이스바 (문장 연습 도우미에서 띄어쓰기를 알려줄 때 쓴다)
+const KP_SPACE = { x:198, y:KP_TOP + 3*(KP_KH+KP_GAP), w:304, h:44 };
+
+// 키보드 + 손 그림 SVG 만들기 (자리연습과 타자연습 도우미가 같이 쓴다)
+function kpBuildSVG(opts){
+  const lang = opts.lang || 'ko';
+  const chars = KP_CHARS[lang] || KP_CHARS.ko;
+  const active = opts.target || '';
+  const stageCodes = opts.stageCodes || null;   // null이면 전체를 밝게
   const inStage = {};
-  (KP_STAGES[kpState.stage] || KP_STAGES.all).codes.forEach(function(c){ inStage[c] = true; });
-  const active = kpState.target;
+  if(stageCodes) stageCodes.forEach(function(c){ inStage[c] = true; });
 
   let rects = '', labels = '';
   KP_ROWS.forEach(function(row){
@@ -3020,15 +3170,13 @@ function renderKpBoard(){
       const xy = kpKeyXY(code);
       const f = KP_FINGER[code];
       const isActive = (code === active);
-      const dimmed = !inStage[code];
+      const dimmed = stageCodes ? !inStage[code] : false;
       const fill = isActive ? '#2fa39c' : KP_FINGER_COLOR[f];
       const op = isActive ? 1 : (dimmed ? 0.14 : 0.3);
 
       rects += '<g data-code="' + code + '">' +
         '<rect x="' + xy.x + '" y="' + xy.y + '" width="' + KP_KW + '" height="' + KP_KH + '" rx="10" ' +
           'fill="' + fill + '" opacity="' + op + '" stroke="#ffffff" stroke-width="2"/></g>';
-
-      // 글자는 손 위에 그려서 손가락에 가려지지 않게 한다
       labels += '<text x="' + (xy.x + KP_KW/2) + '" y="' + (xy.y + KP_KH/2 + 9) + '" text-anchor="middle" ' +
           'font-size="25" font-weight="800" fill="' + (isActive ? '#ffffff' : '#39434f') + '" ' +
           'opacity="' + (dimmed ? 0.3 : 1) + '" paint-order="stroke" stroke="#ffffff" stroke-width="' + (isActive ? 0 : 3) + '">' +
@@ -3036,15 +3184,30 @@ function renderKpBoard(){
     });
   });
 
-  const svg =
-    '<svg viewBox="0 0 ' + KP_VIEW_W + ' ' + KP_VIEW_H + '" class="kp-svg" xmlns="http://www.w3.org/2000/svg">' +
-      rects +
-      kpDrawHand('left', active) +
-      kpDrawHand('right', active) +
-      labels +
-    '</svg>';
+  // 스페이스바 (도우미에서만 보여준다)
+  if(opts.showSpace){
+    const isActive = (active === 'Space');
+    rects += '<g data-code="Space"><rect x="' + KP_SPACE.x + '" y="' + KP_SPACE.y + '" width="' + KP_SPACE.w +
+      '" height="' + KP_SPACE.h + '" rx="10" fill="' + (isActive ? '#2fa39c' : '#c9d2db') +
+      '" opacity="' + (isActive ? 1 : 0.3) + '" stroke="#ffffff" stroke-width="2"/></g>';
+    labels += '<text x="' + (KP_SPACE.x + KP_SPACE.w/2) + '" y="' + (KP_SPACE.y + KP_SPACE.h/2 + 6) +
+      '" text-anchor="middle" font-size="16" font-weight="800" fill="' + (isActive ? '#ffffff' : '#39434f') +
+      '" paint-order="stroke" stroke="#ffffff" stroke-width="' + (isActive ? 0 : 3) + '">띄어쓰기</text>';
+  }
 
-  document.getElementById('kp-board').innerHTML = svg;
+  const hands = (opts.showHands === false) ? '' :
+    (kpDrawHand('left', active) + kpDrawHand('right', active));
+
+  return '<svg viewBox="0 0 ' + KP_VIEW_W + ' ' + KP_VIEW_H + '" class="kp-svg" xmlns="http://www.w3.org/2000/svg">' +
+         rects + hands + labels + '</svg>';
+}
+
+function renderKpBoard(){
+  document.getElementById('kp-board').innerHTML = kpBuildSVG({
+    lang: kpState.lang,
+    target: kpState.target,
+    stageCodes: (KP_STAGES[kpState.stage] || KP_STAGES.all).codes
+  });
 }
 
 function kpNextTarget(){
@@ -3259,6 +3422,7 @@ function startTest(){
   pauseBtn.textContent = '잠깐 멈출게요';
   pauseBtn.onclick = pauseTest;
 
+  applyKeyHelpUI();
   showScreen('screen-test');
   setTimeout(() => box.focus(), 50);
 
@@ -3317,6 +3481,7 @@ function onType(){
   state._lastLen = typed.length;
 
   renderPassage(typed);
+  updateKeyHelp();
   document.getElementById('test-progress').textContent = (state.sentencesDone + 1) + '번째 문장 · ' + typed.length + ' / ' + state.passage.length;
 
   const elapsedMin = Math.max((Date.now() - state.startTime - state.pausedMs) / 60000, 0.01);
@@ -3381,6 +3546,7 @@ function advanceSentence(){
   state.passage = drawNextSentence();
   box.value = '';
   renderPassage('');
+  updateKeyHelp();
   document.getElementById('test-progress').textContent = (state.sentencesDone + 1) + '번째 문장 · 0 / ' + state.passage.length;
 }
 
