@@ -1474,16 +1474,34 @@
 }
 
 /* 손 모양 도우미를 켜면 위쪽을 압축해서 키보드가 한 화면에 들어오게 한다 */
-/* 화면 높이에 맞춰 줄여서, 작은 노트북에서도 키보드까지 한 화면에 들어오게 한다 */
-#screen-test.keyhelp-on .tp-passage{
-  padding:10px 16px;
-  height:clamp(76px, 19vh, 180px);
-}
-#screen-test.keyhelp-on .tp-typebox{ padding:8px 14px; font-size:clamp(16px,2.2vw,26px); }
-#screen-test.keyhelp-on #keyhelp-toggle{ margin:0; }
-#screen-test.keyhelp-on #keyhelp-board{ max-width:min(430px, 52vh); padding:4px; }
-#screen-test.keyhelp-on .tp-stats-bar{ margin-top:4px; }
 #keyhelp-hint{ min-height:20px; font-size:15px; }
+
+/* 손 모양 도우미
+   - 키보드와 손: 화면 가운데 아래에 크게
+   - 안내 글씨와 보기/숨기기 버튼: 왼쪽 아래 구석에 고정 (가운데 세로 공간을 안 먹게) */
+#keyhelp-board{
+  margin:8px auto 0;
+  max-width:min(700px, 56vh);
+  width:100%;
+}
+#keyhelp-corner{
+  position:fixed; left:14px; bottom:14px; z-index:60;
+  display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+  max-width:200px;
+}
+#keyhelp-hint{
+  margin:0; font-weight:800; text-align:left;
+  font-size:14px; line-height:1.3;
+  background:var(--card,#fff); border-radius:10px; padding:6px 10px;
+  box-shadow:0 3px 10px rgba(0,0,0,.1);
+}
+#keyhelp-toggle{ padding:8px 14px; font-size:13px; white-space:nowrap; }
+@media (max-width:620px){
+  #keyhelp-corner{ left:8px; bottom:8px; max-width:150px; }
+  #keyhelp-hint{ font-size:12px; padding:4px 8px; }
+  #keyhelp-toggle{ font-size:12px; padding:6px 10px; }
+}
+
 </style>
 
 <div class="tp-root">
@@ -2183,12 +2201,10 @@
       <div class="tp-passage" id="test-passage"></div>
       <input class="tp-typebox" id="test-input" type="text" placeholder="여기를 클릭하고 입력을 시작하세요" oninput="onType()" onkeydown="onEnterKey(event)" autocomplete="off">
       <p class="tp-sub" style="text-align:center; margin-top:-6px;">문장을 다 쳤으면 <strong>Enter</strong>를 눌러 다음 문장으로 넘어가세요</p>
-      <div style="display:flex; justify-content:center; margin:4px 0 2px;">
-        <button class="tp-btn ghost" id="keyhelp-toggle" onclick="toggleKeyHelp()" style="padding:8px 16px; font-size:14px;">⌨️ 손 모양 보기</button>
-      </div>
-      <div id="keyhelp-wrap" style="display:none;">
-        <p class="tp-sub" id="keyhelp-hint" style="text-align:center; margin:0 0 6px; font-weight:800;"></p>
-        <div class="kp-board" id="keyhelp-board" style="margin:0 auto;"></div>
+      <div class="kp-board" id="keyhelp-board" style="display:none;"></div>
+      <div id="keyhelp-corner">
+        <p class="tp-sub" id="keyhelp-hint"></p>
+        <button class="tp-btn ghost" id="keyhelp-toggle" onclick="toggleKeyHelp()">⌨️ 손 모양 보기</button>
       </div>
       <div class="tp-stats-bar">
         <span>실시간 타수 <span class="tp-livecpm" id="test-cpm">0</span> 타/분</span>
@@ -2820,15 +2836,9 @@ function adjustPassageFontSize(el, charLen){
   } else if(charLen <= 35){
     fontSize = Math.min(68, containerWidth / (charLen / 2.8) * 1.0);
   } else if(charLen <= 50){
-    fontSize = Math.min(56, containerWidth / (charLen / 3.4) * 0.95);
+    fontSize = Math.min(58, containerWidth / (charLen / 3.6) * 0.98);
   } else {
-    fontSize = Math.min(46, containerWidth / (charLen / 4) * 0.9);
-  }
-
-  // 손 모양 도우미를 켜면 상자가 작아지므로 글씨도 줄인다
-  const compact = document.getElementById('screen-test');
-  if(compact && compact.classList.contains('keyhelp-on') && el.id === 'test-passage'){
-    fontSize = fontSize * 0.95;
+    fontSize = Math.min(50, containerWidth / (charLen / 4.5) * 0.95);
   }
 
   fontSize = Math.max(20, Math.round(fontSize));
@@ -2896,17 +2906,48 @@ function isKeyHelpOn(){
 }
 function applyKeyHelpUI(){
   const on = isKeyHelpOn();
-  const wrap = document.getElementById('keyhelp-wrap');
+  const wrap = document.getElementById('keyhelp-board');
   const btn = document.getElementById('keyhelp-toggle');
   if(wrap) wrap.style.display = on ? '' : 'none';
+  const hint = document.getElementById('keyhelp-hint');
+  if(hint) hint.style.display = on ? '' : 'none';
   if(btn) btn.textContent = on ? '⌨️ 손 모양 숨기기' : '⌨️ 손 모양 보기';
   const scr = document.getElementById('screen-test');
   if(scr) scr.classList.toggle('keyhelp-on', on);
   if(on) updateKeyHelp();
+  setTimeout(fitKeyHelpLayout, 0);
 }
+window.addEventListener('resize', function(){
+  const scr = document.getElementById('screen-test');
+  if(scr && scr.classList.contains('active')) fitKeyHelpLayout();
+});
+
 function toggleKeyHelp(){
   try { localStorage.setItem('tadak_keyhelp', isKeyHelpOn() ? '0' : '1'); } catch(e){}
   applyKeyHelpUI();
+}
+
+
+// 키보드를 구석에 띄웠으므로 문장칸은 화면에 남는 세로 공간만큼 키운다.
+// 창 크기가 제각각이라 CSS로 고정하지 않고 실제로 재서 맞춘다.
+function fitKeyHelpLayout(){
+  const pass = document.getElementById('test-passage');
+  const screen = document.getElementById('screen-test');
+  if(!pass || !screen || !screen.classList.contains('active')) return;
+  // 도우미를 켜면 키보드 끝까지, 끄면 입력칸 아래 안내까지 화면에 보이게 맞춘다.
+  // (그 아래 '잠깐 멈출게요' 버튼은 스크롤해서 봐도 괜찮다)
+  const card = isKeyHelpOn()
+    ? document.getElementById('keyhelp-board')
+    : document.getElementById('test-input');
+  pass.style.height = '';
+  for(let i = 0; i < 3; i++){
+    const slack = window.innerHeight - card.getBoundingClientRect().bottom - 14;
+    if(Math.abs(slack) < 8) break;
+    const next = Math.max(120, Math.min(460, pass.clientHeight + slack));
+    if(Math.round(next) === Math.round(pass.clientHeight)) break;
+    pass.style.height = next + 'px';
+  }
+  adjustPassageFontSize(pass, (state.passage || '').length);
 }
 
 function updateKeyHelp(){
@@ -3445,6 +3486,8 @@ function startTest(){
 
   applyKeyHelpUI();
   showScreen('screen-test');
+  setTimeout(fitKeyHelpLayout, 30);
+  setTimeout(fitKeyHelpLayout, 300);
   setTimeout(() => box.focus(), 50);
 
   startTimerInterval();
