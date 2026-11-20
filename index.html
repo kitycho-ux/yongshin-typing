@@ -1474,15 +1474,16 @@
 }
 
 /* 손 모양 도우미를 켜면 위쪽을 압축해서 키보드가 한 화면에 들어오게 한다 */
+/* 화면 높이에 맞춰 줄여서, 작은 노트북에서도 키보드까지 한 화면에 들어오게 한다 */
 #screen-test.keyhelp-on .tp-passage{
-  padding:12px 16px;
-  font-size:clamp(18px, 2.6vw, 34px);
-  height:clamp(84px, 12vw, 132px);
+  padding:10px 16px;
+  height:clamp(76px, 19vh, 180px);
 }
-#screen-test.keyhelp-on .tp-typebox{ padding:10px 14px; font-size:clamp(16px,2.2vw,26px); }
-#screen-test.keyhelp-on #keyhelp-board{ max-width:560px; padding:6px; }
+#screen-test.keyhelp-on .tp-typebox{ padding:8px 14px; font-size:clamp(16px,2.2vw,26px); }
+#screen-test.keyhelp-on #keyhelp-toggle{ margin:0; }
+#screen-test.keyhelp-on #keyhelp-board{ max-width:min(430px, 52vh); padding:4px; }
 #screen-test.keyhelp-on .tp-stats-bar{ margin-top:4px; }
-#keyhelp-hint{ min-height:22px; }
+#keyhelp-hint{ min-height:20px; font-size:15px; }
 </style>
 
 <div class="tp-root">
@@ -2182,7 +2183,7 @@
       <div class="tp-passage" id="test-passage"></div>
       <input class="tp-typebox" id="test-input" type="text" placeholder="여기를 클릭하고 입력을 시작하세요" oninput="onType()" onkeydown="onEnterKey(event)" autocomplete="off">
       <p class="tp-sub" style="text-align:center; margin-top:-6px;">문장을 다 쳤으면 <strong>Enter</strong>를 눌러 다음 문장으로 넘어가세요</p>
-      <div style="display:flex; justify-content:center; margin:6px 0 2px;">
+      <div style="display:flex; justify-content:center; margin:4px 0 2px;">
         <button class="tp-btn ghost" id="keyhelp-toggle" onclick="toggleKeyHelp()" style="padding:8px 16px; font-size:14px;">⌨️ 손 모양 보기</button>
       </div>
       <div id="keyhelp-wrap" style="display:none;">
@@ -2827,7 +2828,7 @@ function adjustPassageFontSize(el, charLen){
   // 손 모양 도우미를 켜면 상자가 작아지므로 글씨도 줄인다
   const compact = document.getElementById('screen-test');
   if(compact && compact.classList.contains('keyhelp-on') && el.id === 'test-passage'){
-    fontSize = fontSize * 0.6;
+    fontSize = fontSize * 0.95;
   }
 
   fontSize = Math.max(20, Math.round(fontSize));
