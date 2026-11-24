@@ -1479,7 +1479,7 @@
 /* 손 모양 도우미
    - 키보드와 손: 화면 가운데 아래에 크게
    - 안내 글씨와 보기/숨기기 버튼: 왼쪽 아래 구석에 고정 (가운데 세로 공간을 안 먹게) */
-#keyhelp-board{
+#keyhelp-board, #battlehelp-board{
   margin:8px auto 0;
   max-width:min(700px, 56vh);
   width:100%;
@@ -1502,6 +1502,59 @@
   #keyhelp-toggle{ font-size:12px; padding:6px 10px; }
 }
 
+
+/* ===== 포인트 안내 카드 (내 포인트 + 얻는 법) ===== */
+.pt-card{ padding:0 !important; overflow:hidden; }
+.pt-grid{ display:grid; grid-template-columns:296px minmax(0,1fr); }
+
+.pt-me{ position:relative; padding:26px 24px 24px; display:flex; flex-direction:column; overflow:hidden;
+  background:linear-gradient(155deg,#8E7BEE 0%,#B98BE6 55%,#F3A0C0 100%); }
+.pt-sparks{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.pt-lab{ font-size:12.5px; color:rgba(255,255,255,.85); font-weight:600; position:relative; }
+.pt-topline{ display:flex; align-items:flex-end; gap:10px; position:relative; }
+.pt-big{ font-size:46px; font-weight:900; letter-spacing:-2.5px; line-height:1; color:#fff; }
+.pt-big i{ font-size:21px; font-weight:700; font-style:normal; margin-left:2px; opacity:.9; }
+.pt-mascot{ margin-left:auto; margin-bottom:-2px; }
+
+.pt-goal{ position:relative; margin-top:18px; background:rgba(255,255,255,.2); border-radius:16px; padding:13px 15px 15px; }
+.pt-g1{ font-size:12.5px; color:rgba(255,255,255,.95); margin:0; }
+.pt-g1 b{ font-weight:800; }
+.pt-trackwrap{ position:relative; margin:12px 0 8px; height:10px; }
+.pt-track{ height:10px; border-radius:99px; background:rgba(255,255,255,.3); overflow:hidden; }
+.pt-track i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#FFF2A8,#FFFFFF);
+  transition:width .5s ease; }
+.pt-runner{ position:absolute; top:50%; transform:translate(-50%,-50%); transition:left .5s ease; }
+.pt-g2{ font-size:11.5px; color:rgba(255,255,255,.82); margin:0; }
+
+.pt-acts{ margin-top:auto; display:flex; flex-direction:column; gap:9px; padding-top:20px; position:relative; }
+.pt-btn{ border:none; border-radius:14px; padding:13px; font-family:inherit; font-size:14.5px; font-weight:800;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; }
+.pt-btn.w{ background:#fff; color:#7A5FD8; box-shadow:0 4px 0 rgba(255,255,255,.45); }
+.pt-btn.g{ background:rgba(255,255,255,.2); color:#fff; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55); }
+.pt-btn:active{ transform:translateY(1px); }
+
+.pt-how{ padding:24px 26px 22px; }
+.pt-hh{ display:flex; align-items:center; gap:8px; margin-bottom:3px; }
+.pt-how h3{ font-size:18.5px; font-weight:900; letter-spacing:-.5px; margin:0; color:var(--text); }
+.pt-sub{ font-size:12.5px; color:var(--muted); margin:0 0 14px; }
+.pt-it{ display:flex; align-items:center; gap:12px; padding:10px 0; }
+.pt-it + .pt-it{ border-top:1px solid var(--line); }
+.pt-ic{ width:38px; height:38px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.pt-tx{ flex:1; min-width:0; }
+.pt-tx b{ display:block; font-size:14.5px; font-weight:800; color:var(--text); }
+.pt-tx span{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; }
+.pt-pv{ font-size:17.5px; font-weight:900; letter-spacing:-.5px; white-space:nowrap; }
+.pt-pv small{ font-size:11px; margin-left:1px; }
+.pt-pv.mint{ color:#2FAE8C; }
+.pt-pv.blush{ color:#F2698F; }
+
+@media (max-width:860px){
+  .pt-grid{ grid-template-columns:1fr; }
+  .pt-me{ padding:22px 20px 20px; }
+  .pt-acts{ flex-direction:row; padding-top:16px; }
+  .pt-acts .pt-btn{ flex:1; }
+  .pt-how{ padding:20px; }
+}
 </style>
 
 <div class="tp-root">
@@ -1612,40 +1665,89 @@
           </div>
 
           <!-- 포인트 안내 카드 -->
-          <div class="tp-home-card">
-            <div class="tp-home-card-head">
-              <div>
-                <p class="tp-card-tag">포인트 얻는 법</p>
-                <h3 class="tp-card-title">💎 상점 포인트 안내</h3>
-              </div>
-            </div>
-            <h4 class="tp-shop-title">🛍️ 상점</h4>
-            <div class="tp-shop-buttons">
-              <button class="tp-shop-nav-btn shop" onclick="goShop()">🛍️ 상점 열기<span>테두리 · 배경 · 배지 · 아바타</span></button>
-              <button class="tp-shop-nav-btn mystyle" onclick="goMyStyle()">🎨 내 꾸미기<span>산 아이템 골라서 장착</span></button>
-            </div>
-            <p class="tp-sub" style="text-align:center; margin-top:6px; color:var(--muted); font-size:11px;">💡 자유시간 쿠폰은 상점 안에서 살 수 있어요</p>
+          <div class="tp-home-card pt-card">
+            <div class="pt-grid">
+              <!-- 왼쪽: 내 포인트 -->
+              <div class="pt-me">
+                <svg class="pt-sparks" viewBox="0 0 336 420" fill="none" aria-hidden="true">
+                  <g fill="#fff" opacity=".5">
+                    <path d="M44 86l3.2 7.6L55 97l-7.8 3.4L44 108l-3.2-7.6L33 97l7.8-3.4z"/>
+                    <path d="M296 54l2.4 5.7 5.8 2.5-5.8 2.6-2.4 5.7-2.4-5.7-5.8-2.6 5.8-2.5z"/>
+                    <path d="M22 300l2 4.8 4.9 2.1-4.9 2.2-2 4.8-2-4.8-4.9-2.2 4.9-2.1z"/>
+                    <path d="M312 268l2.8 6.7 6.8 3-6.8 2.9-2.8 6.7-2.8-6.7-6.8-2.9 6.8-3z"/>
+                  </g>
+                  <circle cx="286" cy="150" r="5" fill="#fff" opacity=".28"/>
+                  <circle cx="30" cy="196" r="7" fill="#fff" opacity=".22"/>
+                  <circle cx="308" cy="356" r="9" fill="#fff" opacity=".18"/>
+                </svg>
 
-            <div class="tp-point-grid" style="margin-top:14px;">
-              <div class="tp-point-item">
-                <div class="tp-point-row"><strong>연습 참여</strong><span class="tp-point-badge">+5P</span></div>
-                <p class="tp-point-desc">연습을 마칠 때마다 항상 받아요</p>
+                <span class="pt-lab">내 포인트</span>
+                <div class="pt-topline">
+                  <div class="pt-big" id="pt-balance">0<i>P</i></div>
+                  <svg class="pt-mascot" width="76" height="72" viewBox="0 0 78 74" fill="none" aria-hidden="true">
+                    <ellipse cx="39" cy="68" rx="20" ry="4" fill="#6B55C9" opacity=".25"/>
+                    <path d="M20 16h38l12 15-31 31L8 31z" fill="#FFFFFF"/>
+                    <path d="M20 16h38l12 15H8z" fill="#EFE9FF"/>
+                    <path d="M39 16l-8 15 8 31 8-31z" fill="#FFF9D8" opacity=".9"/>
+                    <ellipse cx="30.5" cy="40" rx="3.1" ry="3.6" fill="#4C3C86"/>
+                    <ellipse cx="47.5" cy="40" rx="3.1" ry="3.6" fill="#4C3C86"/>
+                    <circle cx="31.7" cy="38.8" r="1.1" fill="#fff"/><circle cx="48.7" cy="38.8" r="1.1" fill="#fff"/>
+                    <ellipse cx="23" cy="45" rx="4.4" ry="2.8" fill="#FFADC8" opacity=".75"/>
+                    <ellipse cx="55" cy="45" rx="4.4" ry="2.8" fill="#FFADC8" opacity=".75"/>
+                    <path d="M35 47q4 4.4 8 0" stroke="#4C3C86" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+                  </svg>
+                </div>
+
+                <div class="pt-goal" id="pt-goal">
+                  <p class="pt-g1">다음 목표 <b id="pt-goal-name">-</b></p>
+                  <div class="pt-trackwrap">
+                    <div class="pt-track"><i id="pt-track-fill" style="width:0%"></i></div>
+                    <svg class="pt-runner" id="pt-runner" width="26" height="26" viewBox="0 0 26 26" fill="none" style="left:0%">
+                      <circle cx="13" cy="13" r="11" fill="#fff"/>
+                      <path d="M7.5 9h11l2.2 3-7.7 8.4L5.3 12z" fill="#FFD36E"/>
+                      <path d="M7.5 9h11l2.2 3H5.3z" fill="#FFE49B"/>
+                    </svg>
+                  </div>
+                  <p class="pt-g2" id="pt-goal-left">-</p>
+                </div>
+
+                <div class="pt-acts">
+                  <button class="pt-btn w" onclick="goShop()">
+                    <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M4 7h12l-1.1 8.4a1.6 1.6 0 01-1.6 1.4H6.7a1.6 1.6 0 01-1.6-1.4z" fill="#A98BF0"/><path d="M7.2 7V5.6a2.8 2.8 0 015.6 0V7" stroke="#7A5FD8" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    상점 열기</button>
+                  <button class="pt-btn g" onclick="goMyStyle()">
+                    <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 3a7 7 0 000 14c1 0 1.6-.7 1.6-1.5 0-.9-.8-1.3-.8-2.1 0-.6.5-1 1.1-1H13a4 4 0 004-4c0-3-3.1-5.4-7-5.4z" fill="#fff" opacity=".9"/><circle cx="7" cy="8" r="1.1" fill="#9B86EC"/><circle cx="10.4" cy="6.4" r="1.1" fill="#9B86EC"/><circle cx="13.6" cy="8.4" r="1.1" fill="#9B86EC"/></svg>
+                    내 꾸미기</button>
+                </div>
               </div>
-              <div class="tp-point-item">
-                <div class="tp-point-row"><strong>순위 보상</strong><span class="tp-point-badge">1위 100P · 2위 70P · 3위 50P</span></div>
-                <p class="tp-point-desc">상위 30% 30P · 완주자 10P (한글/영어 각각)</p>
-              </div>
-              <div class="tp-point-item">
-                <div class="tp-point-row"><strong>매일 첫 연습</strong><span class="tp-point-badge">시간별 지급</span></div>
-                <p class="tp-point-desc">30초 5P · 60초 10P · 90초 15P · 120초 20P</p>
-              </div>
-              <div class="tp-point-item">
-                <div class="tp-point-row"><strong>최고 기록 갱신</strong><span class="tp-point-badge">+10P</span></div>
-                <p class="tp-point-desc">10% 이상 성장하면 +10P 추가로 받아요!</p>
-              </div>
-              <div class="tp-point-item">
-                <div class="tp-point-row"><strong>연속 접속</strong><span class="tp-point-badge">3일 +20P · 7일 +50P</span></div>
-                <p class="tp-point-desc">꾸준히 연습하면 보너스가 쌓여요.</p>
+
+              <!-- 오른쪽: 얻는 법 -->
+              <div class="pt-how">
+                <div class="pt-hh">
+                  <h3>포인트 얻는 법</h3>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.5l1.7 4 4.3.4-3.3 2.8 1 4.2L10 11.7l-3.7 2.2 1-4.2L4 6.9l4.3-.4z" fill="#FFD36E"/></svg>
+                </div>
+                <p class="pt-sub">연습할수록 쌓여요</p>
+
+                <div class="pt-it"><div class="pt-ic" style="background:#E7F7F1">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="6" width="19" height="12.5" rx="3" fill="#8FDCC4"/><rect x="5" y="8.6" width="2.6" height="2.4" rx="1" fill="#fff"/><rect x="8.8" y="8.6" width="2.6" height="2.4" rx="1" fill="#fff"/><rect x="12.6" y="8.6" width="2.6" height="2.4" rx="1" fill="#fff"/><rect x="16.4" y="8.6" width="2.6" height="2.4" rx="1" fill="#fff"/><rect x="7" y="13" width="10" height="2.6" rx="1.3" fill="#fff"/></svg></div>
+                  <div class="pt-tx"><b>연습 참여</b><span>연습을 마칠 때마다</span></div><span class="pt-pv mint">+5<small>P</small></span></div>
+
+                <div class="pt-it"><div class="pt-ic" style="background:#FFF6E0">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="#FFCF5C"/><g stroke="#FFCF5C" stroke-width="2.1" stroke-linecap="round"><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></g></svg></div>
+                  <div class="pt-tx"><b>매일 첫 연습</b><span>30초 5P부터 120초 20P까지</span></div><span class="pt-pv mint">+5~20<small>P</small></span></div>
+
+                <div class="pt-it"><div class="pt-ic" style="background:#E8F0FF">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 16.5l5-5 3.2 3.2L20 7" stroke="#7FA8F5" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h5v5" stroke="#7FA8F5" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div class="pt-tx"><b>최고 기록 갱신</b><span>10% 넘게 늘면 10P 더</span></div><span class="pt-pv mint">+10<small>P</small></span></div>
+
+                <div class="pt-it"><div class="pt-ic" style="background:#FFEDF3">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M7.4 3.6h9.2v5.1a4.6 4.6 0 11-9.2 0z" fill="#FF9EBC"/><path d="M7.4 5.2H5.2v1.1a3 3 0 002.7 3M16.6 5.2h2.2v1.1a3 3 0 01-2.7 3" stroke="#FFB9D0" stroke-width="1.7" stroke-linecap="round"/><rect x="10.8" y="13.2" width="2.4" height="3.1" fill="#FFC2D5"/><rect x="7.6" y="16.3" width="8.8" height="2.6" rx="1.2" fill="#FFC2D5"/><circle cx="12" cy="6.6" r="1.5" fill="#fff" opacity=".85"/></svg></div>
+                  <div class="pt-tx"><b>순위 보상</b><span>하루 한 번, 한글 영어 각각</span></div><span class="pt-pv blush">+10~100<small>P</small></span></div>
+
+                <div class="pt-it"><div class="pt-ic" style="background:#FFEEE6">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M13.4 2.2c.6 2.9-.5 4.4-1.9 5.7-1.6 1.5-3.6 3-3.6 6.2A6.1 6.1 0 0014 20c3.4 0 6-2.6 6-6.1 0-4.4-3.4-6.6-4.4-9.1-.4-1-.9-1.9-2.2-2.6z" fill="#FF9A6B"/><path d="M12.6 11.6c.4 1.6-.4 2.2-1.1 3-.7.8-1.3 1.5-1.3 2.7A3 3 0 0013 20a3 3 0 002.9-3c0-2.1-2.2-3.4-3.3-5.4z" fill="#FFD9A8"/></svg></div>
+                  <div class="pt-tx"><b>연속 접속</b><span>3일 20P, 7일 50P</span></div><span class="pt-pv mint">+20~50<small>P</small></span></div>
               </div>
             </div>
           </div>
@@ -2141,6 +2243,7 @@
           <div id="battle-live-rank"></div>
         </div>
       </div>
+      <div class="kp-board" id="battlehelp-board" style="display:none;"></div>
     </div>
 
     <!-- BATTLE RESULT (결과) -->
@@ -2192,6 +2295,12 @@
         </div>
       </div>
     </div>
+    <!-- 손 모양 도우미: 연습·배틀 화면에서 함께 쓰는 구석 상자 -->
+    <div id="keyhelp-corner" style="display:none;">
+      <p class="tp-sub" id="keyhelp-hint"></p>
+      <button class="tp-btn ghost" id="keyhelp-toggle" onclick="toggleKeyHelp()">⌨️ 손 모양 보기</button>
+    </div>
+
     <div class="tp-screen" id="screen-test">
       <div id="hit-feedback"></div>
       <div class="tp-stats-bar">
@@ -2202,10 +2311,7 @@
       <input class="tp-typebox" id="test-input" type="text" placeholder="여기를 클릭하고 입력을 시작하세요" oninput="onType()" onkeydown="onEnterKey(event)" autocomplete="off">
       <p class="tp-sub" style="text-align:center; margin-top:-6px;">문장을 다 쳤으면 <strong>Enter</strong>를 눌러 다음 문장으로 넘어가세요</p>
       <div class="kp-board" id="keyhelp-board" style="display:none;"></div>
-      <div id="keyhelp-corner">
-        <p class="tp-sub" id="keyhelp-hint"></p>
-        <button class="tp-btn ghost" id="keyhelp-toggle" onclick="toggleKeyHelp()">⌨️ 손 모양 보기</button>
-      </div>
+
       <div class="tp-stats-bar">
         <span>실시간 타수 <span class="tp-livecpm" id="test-cpm">0</span> 타/분</span>
         <span id="test-progress">0 / 0</span>
@@ -2555,10 +2661,13 @@ function showScreen(id){
   document.querySelectorAll('.tp-screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id === 'screen-login' || id === 'screen-home') setTimeout(syncKpStageRow, 0);
+  setTimeout(applyKeyHelpUI, 0);
+  // .tp-body 폭이 0.2초에 걸쳐 바뀌므로, 끝난 뒤 글씨 크기를 다시 맞춘다
+  setTimeout(fitKeyHelpLayout, 260);
   const body = document.querySelector('.tp-body');
   if(body){
     body.classList.toggle('wide', id === 'screen-home');
-    body.classList.toggle('wide-test', id === 'screen-test');
+    body.classList.toggle('wide-test', id === 'screen-test' || id === 'screen-battle-game');
   }
 }
 
@@ -2672,6 +2781,68 @@ function logout(){
   backToClassSelect();
 }
 
+
+// ===== 포인트 카드: 내 포인트와 다음 목표 =====
+// 다음 목표는 "아직 안 산 아이템 중 가장 싼 것"으로 자동으로 정한다.
+function pickNextGoal(points){
+  const owned = (typeof shopState !== 'undefined' && shopState && shopState.owned) ? shopState.owned : null;
+  const cats = ['border','background','badge','avatar'];
+  const rest = [];                       // 아직 안 산 아이템
+  cats.forEach(function(cat){
+    (SHOP_ITEMS[cat] || []).forEach(function(item){
+      const have = owned && Array.isArray(owned[cat]) && owned[cat].indexOf(item.id) !== -1;
+      if(!have) rest.push(item);
+    });
+  });
+  if(rest.length === 0) return null;     // 다 샀음
+
+  // 아직 못 사는 것 중 가장 싼 것을 목표로
+  let goal = null;
+  rest.forEach(function(item){
+    if(item.price > points && (!goal || item.price < goal.price)) goal = item;
+  });
+  if(goal) return goal;
+
+  // 안 산 것을 전부 살 수 있는 상태 -> 가장 싼 것을 "지금 살 수 있어요"로
+  let cheapest = rest[0];
+  rest.forEach(function(item){ if(item.price < cheapest.price) cheapest = item; });
+  cheapest = Object.assign({}, cheapest, { affordable: true });
+  return cheapest;
+}
+
+function renderPointCard(points){
+  const bal = document.getElementById('pt-balance');
+  if(!bal) return;
+  const p = Number(points) || 0;
+  bal.innerHTML = p.toLocaleString() + '<i>P</i>';
+
+  const goal = pickNextGoal(p);
+  const nameEl = document.getElementById('pt-goal-name');
+  const leftEl = document.getElementById('pt-goal-left');
+  const fill = document.getElementById('pt-track-fill');
+  const runner = document.getElementById('pt-runner');
+  if(!nameEl || !leftEl || !fill || !runner) return;
+
+  if(!goal){
+    nameEl.textContent = '다 모았어요!';
+    leftEl.textContent = '상점 아이템을 전부 가지고 있어요';
+    fill.style.width = '100%';
+    runner.style.left = '100%';
+    return;
+  }
+  nameEl.textContent = goal.name;
+  if(goal.affordable){
+    leftEl.textContent = goal.price.toLocaleString() + 'P — 지금 바로 살 수 있어요!';
+    fill.style.width = '100%';
+    runner.style.left = '100%';
+    return;
+  }
+  const pct = Math.max(0, Math.min(100, Math.round(p / goal.price * 100)));
+  leftEl.textContent = goal.price.toLocaleString() + 'P 중 ' + Math.max(0, goal.price - p).toLocaleString() + 'P 남았어요';
+  fill.style.width = pct + '%';
+  runner.style.left = pct + '%';
+}
+
 async function updateDashboard(forceRefresh){
   const s = state.student;
   const dash = document.getElementById('user-dashboard');
@@ -2712,6 +2883,12 @@ async function updateDashboard(forceRefresh){
     // 포인트 표시
     const points = myRow ? (Number(myRow.points) || 0) : 0;
     document.getElementById('dash-points').textContent = points.toLocaleString() + 'P';
+    renderPointCard(points);
+    // 보유 아이템을 아직 안 불러왔으면 한 번 불러와서 '다음 목표'를 정확히 맞춘다
+    if(shopState && (!shopState.ownedLoaded)){
+      loadOwnedItems().then(function(){ shopState.ownedLoaded = true; renderPointCard(points); })
+        .catch(function(){});
+    }
   } catch(e){
     console.error('대시보드 갱신 실패', e);
     document.getElementById('dash-best').textContent = '기록 불러오는 중...';
@@ -2845,12 +3022,34 @@ function adjustPassageFontSize(el, charLen){
   el.style.fontSize = fontSize + 'px';
 
   // 넘치면 들어갈 때까지 줄인다 (글자가 잘리는 것 방지)
+  // 문장칸이 flex 가운데 정렬이라 scrollHeight 로는 넘침을 못 잡는다.
+  // 그래서 안에 들어있는 글자들의 실제 높이를 직접 재서 판단한다.
   let guard = 0;
-  while(el.scrollHeight > el.clientHeight + 1 && fontSize > 16 && guard < 40){
+  while(passageContentHeight(el) > passageInnerHeight(el) + 1 && fontSize > 16 && guard < 60){
     fontSize -= 2;
     el.style.fontSize = fontSize + 'px';
     guard++;
   }
+}
+
+// 문장칸 안 글자들이 실제로 차지하는 세로 길이
+function passageContentHeight(el){
+  let top = Infinity, bottom = -Infinity, found = false;
+  const kids = el.children;
+  for(let i = 0; i < kids.length; i++){
+    const r = kids[i].getBoundingClientRect();
+    if(r.height === 0) continue;
+    found = true;
+    if(r.top < top) top = r.top;
+    if(r.bottom > bottom) bottom = r.bottom;
+  }
+  return found ? (bottom - top) : el.scrollHeight;
+}
+
+// 문장칸의 안쪽(여백 뺀) 높이
+function passageInnerHeight(el){
+  const cs = window.getComputedStyle(el);
+  return el.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
 }
 
 function escapeHtml(ch){
@@ -2904,59 +3103,81 @@ function countCorrectKeystrokes(typed, target){
 function isKeyHelpOn(){
   try { return localStorage.getItem('tadak_keyhelp') === '1'; } catch(e){ return false; }
 }
+
+// 지금 어느 화면에서 도우미를 써야 하는지 알아낸다 (타자연습 / 라이브배틀)
+function keyHelpContext(){
+  const test = document.getElementById('screen-test');
+  const battle = document.getElementById('screen-battle-game');
+  if(test && test.classList.contains('active')){
+    return { kind:'test', board:document.getElementById('keyhelp-board'),
+             input:document.getElementById('test-input'),
+             passage:(state.passage || ''), lang:state.lang,
+             fontTarget:document.getElementById('test-passage') };
+  }
+  if(battle && battle.classList.contains('active')){
+    return { kind:'battle', board:document.getElementById('battlehelp-board'),
+             input:document.getElementById('battle-input'),
+             passage:(battleState.passage || ''),
+             lang:(battleState.settings && battleState.settings.lang) || 'ko',
+             fontTarget:document.getElementById('battle-passage') };
+  }
+  return null;
+}
+
 function applyKeyHelpUI(){
   const on = isKeyHelpOn();
-  const wrap = document.getElementById('keyhelp-board');
+  const ctx = keyHelpContext();
+  const corner = document.getElementById('keyhelp-corner');
   const btn = document.getElementById('keyhelp-toggle');
-  if(wrap) wrap.style.display = on ? '' : 'none';
   const hint = document.getElementById('keyhelp-hint');
-  if(hint) hint.style.display = on ? '' : 'none';
+
+  // 연습·배틀 화면에서만 구석 상자를 보여준다
+  if(corner) corner.style.display = ctx ? '' : 'none';
   if(btn) btn.textContent = on ? '⌨️ 손 모양 숨기기' : '⌨️ 손 모양 보기';
+  if(hint) hint.style.display = on ? '' : 'none';
+
+  // 양쪽 키보드 모두 상태를 맞춘다 (화면 전환해도 어긋나지 않게)
+  ['keyhelp-board','battlehelp-board'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) el.style.display = (on && ctx && ctx.board === el) ? '' : 'none';
+  });
+
   const scr = document.getElementById('screen-test');
   if(scr) scr.classList.toggle('keyhelp-on', on);
   if(on) updateKeyHelp();
   setTimeout(fitKeyHelpLayout, 0);
 }
-window.addEventListener('resize', function(){
-  const scr = document.getElementById('screen-test');
-  if(scr && scr.classList.contains('active')) fitKeyHelpLayout();
-});
 
 function toggleKeyHelp(){
   try { localStorage.setItem('tadak_keyhelp', isKeyHelpOn() ? '0' : '1'); } catch(e){}
   applyKeyHelpUI();
 }
 
-
-// 키보드를 구석에 띄웠으므로 문장칸은 화면에 남는 세로 공간만큼 키운다.
-// 창 크기가 제각각이라 CSS로 고정하지 않고 실제로 재서 맞춘다.
+// 문장칸 높이를 화면에 남는 공간만큼 맞춘다
 function fitKeyHelpLayout(){
-  const pass = document.getElementById('test-passage');
-  const screen = document.getElementById('screen-test');
-  if(!pass || !screen || !screen.classList.contains('active')) return;
-  // 도우미를 켜면 키보드 끝까지, 끄면 입력칸 아래 안내까지 화면에 보이게 맞춘다.
-  // (그 아래 '잠깐 멈출게요' 버튼은 스크롤해서 봐도 괜찮다)
-  const card = isKeyHelpOn()
-    ? document.getElementById('keyhelp-board')
-    : document.getElementById('test-input');
+  const ctx = keyHelpContext();
+  if(!ctx || !ctx.fontTarget) return;
+  const pass = ctx.fontTarget;
+  // 도우미를 켜면 키보드 끝까지, 끄면 입력칸까지 보이게
+  const anchor = isKeyHelpOn() ? ctx.board : ctx.input;
+  if(!anchor) return;
   pass.style.height = '';
   for(let i = 0; i < 3; i++){
-    const slack = window.innerHeight - card.getBoundingClientRect().bottom - 14;
+    const slack = window.innerHeight - anchor.getBoundingClientRect().bottom - 14;
     if(Math.abs(slack) < 8) break;
     const next = Math.max(120, Math.min(460, pass.clientHeight + slack));
     if(Math.round(next) === Math.round(pass.clientHeight)) break;
     pass.style.height = next + 'px';
   }
-  adjustPassageFontSize(pass, (state.passage || '').length);
+  adjustPassageFontSize(pass, ctx.passage.length);
 }
 
 function updateKeyHelp(){
   if(!isKeyHelpOn()) return;
-  const board = document.getElementById('keyhelp-board');
-  if(!board) return;
-  const box = document.getElementById('test-input');
-  const typed = box ? box.value : '';
-  let next = kpNextKeyFor(typed, state.passage || '');
+  const ctx = keyHelpContext();
+  if(!ctx || !ctx.board) return;
+  const typed = ctx.input ? ctx.input.value : '';
+  let next = kpNextKeyFor(typed, ctx.passage);
 
   // 끝에 #이 붙어 있으면 Shift를 같이 눌러야 하는 키
   let needShift = false;
@@ -2965,8 +3186,8 @@ function updateKeyHelp(){
   const hint = document.getElementById('keyhelp-hint');
   if(hint){
     if(!next){
-      hint.textContent = (typed.length >= (state.passage || '').length)
-        ? 'Enter를 눌러 다음 문장으로!' : '';
+      hint.textContent = (typed.length >= ctx.passage.length)
+        ? (ctx.kind === 'test' ? 'Enter를 눌러 다음 문장으로!' : '다 쳤어요!') : '';
     } else if(next === 'Space'){
       hint.innerHTML = '<span style="color:#2fa39c">●</span> 엄지로 띄어쓰기';
     } else {
@@ -2976,7 +3197,7 @@ function updateKeyHelp(){
         (needShift ? ' <span style="color:#e05b5b">+ Shift</span>' : '');
     }
   }
-  board.innerHTML = kpBuildSVG({ lang: state.lang, target: next, showSpace: true });
+  ctx.board.innerHTML = kpBuildSVG({ lang: ctx.lang, target: next, showSpace: true });
 }
 
 // ============================================
@@ -5494,6 +5715,9 @@ function startBattleGame(room){
   document.getElementById('battle-progress').textContent = '1번째 문장 · 0 / ' + battleState.passage.length;
 
   showScreen('screen-battle-game');
+  applyKeyHelpUI();
+  setTimeout(fitKeyHelpLayout, 30);
+  setTimeout(fitKeyHelpLayout, 300);
   setTimeout(() => input.focus(), 100);
 
   // 타이머
@@ -5542,6 +5766,7 @@ function onBattleInput(){
   battleState._lastLen = typed.length;
 
   renderBattlePassage(typed);
+  updateKeyHelp();
   document.getElementById('battle-progress').textContent = (battleState.sentencesDone + 1) + '번째 문장 · ' + typed.length + ' / ' + battleState.passage.length;
 
   const now = Date.now();
@@ -5613,6 +5838,7 @@ function advanceBattleSentence(){
   battleState.queueIndex++;
   input.value = '';
   renderBattlePassage('');
+  updateKeyHelp();
   document.getElementById('battle-progress').textContent = (battleState.sentencesDone + 1) + '번째 문장 · 0 / ' + battleState.passage.length;
 }
 
